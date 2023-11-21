@@ -54,6 +54,44 @@ String ingrediente = rs.getString("nombre");
         }        
 return ingredientes;
     }
+    
+    public int obtenerPrecioPlatoDesdeBD(int idPlato) {
+        int precio = 0;
+        try (Connection conn = getConnection()) {
+            String query = "SELECT precio FROM platillo WHERE idPlatillo = ?";
+            PreparedStatement ps = conn.prepareStatement(query);
+            ps.setInt(1, idPlato);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                precio = rs.getInt("precio");
+            } else {
+                System.out.println("Precio del plato no encontrado en la base de datos.");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return precio;
+    }
+    
+        public int obtenerPrecioBebidaDesdeBD(int idBebida) {
+        int precio = 0;
+        try (Connection conn = getConnection()) {
+            String query = "SELECT precio FROM bebida WHERE idBebida = ?";
+            PreparedStatement ps = conn.prepareStatement(query);
+            ps.setInt(1, idBebida);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                precio = rs.getInt("precio");
+            } else {
+                System.out.println("Precio de la bebida no encontrado en la base de datos.");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return precio;
+    }
 
 
     public static void main(String[] args) {

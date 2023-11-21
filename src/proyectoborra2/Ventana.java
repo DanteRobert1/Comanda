@@ -30,19 +30,10 @@ import javax.swing.SwingUtilities;
 public class Ventana extends javax.swing.JFrame {
     ConexionBD conexion;    
     private DefaultListModel<String> modeloLista;
-    private double precioRamen = 370.0; // Precio del Ramen
-    private double precioCurry = 230.0; // Precio del Ramen
-    private double precioSushi = 200.0; // Precio del Ramen
-    private double precioSalmon = 400.0; // Precio del Ramen
-    private double precioMochis = 180.0; // Precio del Ramen
-    private double precioWaffle = 80.0; // Precio del Ramen
-    private double precioRefresco = 20.0; // Precio del Ramen
-    private double precioTeVerde = 60.0; // Precio del Ramen
-    private double precioSake = 120.0; // Precio del Ramen
-    private double precioCalpis = 70.0; // Precio del Ramen
     private int id;
+    private int idBebidas;
     private double total = 0.0; // Variable para almacenar el total acumulado
-    
+    private double totalIva = 0.0;
     /**
      * Creates new form Ventana
      */
@@ -124,7 +115,7 @@ public class Ventana extends javax.swing.JFrame {
         JlblTotal.setForeground(new java.awt.Color(0, 0, 0));
         JlblTotal.setText("T");
 
-        JbtnEliminar.setText("Consultar");
+        JbtnEliminar.setText("Eliminar");
         JbtnEliminar.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 JbtnEliminarActionPerformed(evt);
@@ -519,63 +510,73 @@ public class Ventana extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void JbtnCalpisActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JbtnCalpisActionPerformed
-         agregarALista("Calpis");
-         total += precioCalpis;
+        idBebidas = 3; 
+        agregarALista("Calpis");
+        AgarrarPreciosBebidas();
       JlblTotal.setText("$"+ total);
     }//GEN-LAST:event_JbtnCalpisActionPerformed
 
     private void JbtnRamenActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JbtnRamenActionPerformed
 
+      id = 1;
       agregarALista("Ramen");
-      total += precioRamen;
+      AgarrarPrecios();
       JlblTotal.setText("$"+ total);
     }//GEN-LAST:event_JbtnRamenActionPerformed
 
     private void JbtnRefrescoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JbtnRefrescoActionPerformed
-       agregarALista("Refresco");
-       total += precioRefresco;
+       idBebidas = 4;
+        agregarALista("Refresco");
+       AgarrarPreciosBebidas();
       JlblTotal.setText("$"+ total);
     }//GEN-LAST:event_JbtnRefrescoActionPerformed
 
     private void JbtnCurryActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JbtnCurryActionPerformed
-       agregarALista("Curry");
-       total += precioCurry;
+       id = 2;
+        agregarALista("Curry");
+       AgarrarPrecios();
       JlblTotal.setText("$"+ total);
     }//GEN-LAST:event_JbtnCurryActionPerformed
 
     private void JbtnSushiActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JbtnSushiActionPerformed
-         agregarALista("Sushi");
-         total += precioSushi;
+        id= 3; 
+        agregarALista("Sushi");
+         AgarrarPrecios();
       JlblTotal.setText("$"+ total);
     }//GEN-LAST:event_JbtnSushiActionPerformed
 
     private void JbtnSalmonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JbtnSalmonActionPerformed
+        id = 4;
         agregarALista("Salmon");
-        total += precioSalmon;
+        AgarrarPrecios();
       JlblTotal.setText("$"+ total);
     }//GEN-LAST:event_JbtnSalmonActionPerformed
 
     private void JbtnMochisActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JbtnMochisActionPerformed
+        id = 6;
         agregarALista("Mochis");
-        total += precioMochis;
+        AgarrarPrecios();
       JlblTotal.setText("$"+ total);
     }//GEN-LAST:event_JbtnMochisActionPerformed
 
     private void JbtnWafleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JbtnWafleActionPerformed
+        id = 7;
         agregarALista("Waffle");
-        total += precioWaffle;
+        AgarrarPrecios();
       JlblTotal.setText("$"+ total);
     }//GEN-LAST:event_JbtnWafleActionPerformed
 
     private void JbtnTéActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JbtnTéActionPerformed
+        idBebidas = 1;
         agregarALista("Te Verde");
-        total += precioTeVerde;
+        AgarrarPreciosBebidas();
       JlblTotal.setText("$"+ total);
     }//GEN-LAST:event_JbtnTéActionPerformed
 
     private void JbtnSakeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JbtnSakeActionPerformed
+        idBebidas = 2;
         agregarALista("Sake");
-        total += precioSake;
+        AgarrarPreciosBebidas();
       JlblTotal.setText("$"+ total);
     }//GEN-LAST:event_JbtnSakeActionPerformed
 
@@ -659,6 +660,19 @@ public class Ventana extends javax.swing.JFrame {
         id = 0;
        // JOptionPane.showMessageDialog(this, areaIngredientes, "Ingredientes del Platillo", JOptionPane.INFORMATION_MESSAGE);
  }
+      private void AgarrarPrecios(){
+       int idPlatillo = id;
+       int precioPlato = conexion.obtenerPrecioPlatoDesdeBD(idPlatillo);
+                total += precioPlato;
+                id = 0;
+      }
+      
+      private void AgarrarPreciosBebidas(){
+       int idbebi = idBebidas;
+       int precioBebida = conexion.obtenerPrecioBebidaDesdeBD(idbebi);
+                total += precioBebida;
+                idBebidas = 0;
+      }
       
       /*
  private int obtenerIDPlatilloDesdeAlgunaParte() {
@@ -716,7 +730,11 @@ return 1;
     }
     
     private void ConfirmacionTasSeguro(){
-        int confirmacion = JOptionPane.showConfirmDialog(this,"¿Estás seguro de continuar? pagaras $"+total+"pesos", "Confirmación", JOptionPane.YES_NO_OPTION);
+        double Iva;
+        double Final;
+        Iva = total * 0.16;
+        Final = total + Iva;
+        int confirmacion = JOptionPane.showConfirmDialog(this,"¿Estás seguro de continuar? pagaras $"+Final+"pesos", "Confirmación", JOptionPane.YES_NO_OPTION);
 
         if (confirmacion == JOptionPane.YES_OPTION) {
             // El usuario ha hecho clic en "Sí", realiza la acción que deseas
