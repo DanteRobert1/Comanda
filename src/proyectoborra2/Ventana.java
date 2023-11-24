@@ -3,16 +3,26 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
 package proyectoborra2;
+import java.sql.Connection;
 import Conexion.ConexionBD;
-import com.sun.jdi.connect.spi.Connection;
+import static Conexion.ConexionBD.getConnection;
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.DefaultListModel;
+import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -20,6 +30,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.ListModel;
 import javax.swing.SwingUtilities;
 
 
@@ -28,8 +39,10 @@ import javax.swing.SwingUtilities;
  * @author Daniel
  */
 public class Ventana extends javax.swing.JFrame {
+    private JList<String> platillo;
     ConexionBD conexion;    
     private DefaultListModel<String> modeloLista;
+    private Map<String, Integer> nombrePlatilloID;
     private int id;
     private int idBebidas;
     private double total = 0.0; // Variable para almacenar el total acumulado
@@ -38,6 +51,7 @@ public class Ventana extends javax.swing.JFrame {
      * Creates new form Ventana
      */
     public Ventana() {
+        
         initComponents();
         inicializarObjetos();
         modeloLista = new DefaultListModel<>();
@@ -46,8 +60,53 @@ public class Ventana extends javax.swing.JFrame {
     }
     
      private void inicializarObjetos() {
-   
+                     try {
+                         for (int i = 1; i <= 8; i++) {
+           boolean existencia = verificarDisponibilidadTotalPlatillo(i);
+           if (!existencia){
+               ImageIcon iconoN;
+           switch (i){
+               case 1:
+                   iconoN = new ImageIcon ("src\\Imagenes\\RamenN.png");
+                   JbtnRamen.setIcon(iconoN);
+                   JbtnRamen.setEnabled(false);
+                   break;
+               case 2:
+                   iconoN = new ImageIcon ("src\\Imagenes\\CurryN.png");
+                   JbtnCurry.setIcon(iconoN);
+                   JbtnCurry.setEnabled(false);
+                   break;
+               case 3:
+                   iconoN = new ImageIcon ("src\\Imagenes\\SushiN.png");
+                   JbtnSushi.setIcon(iconoN);
+                   JbtnSushi.setEnabled(false);
+                   break;
+               case 4:
+                   iconoN = new ImageIcon ("src\\Imagenes\\SalmonMarinadoN.png");
+                   JbtnSalmon.setIcon(iconoN);
+                   JbtnSalmon.setEnabled(false);
+                   break;
+               case 6:
+                   iconoN = new ImageIcon ("src\\Imagenes\\MochisN.png");
+                   JbtnMochis.setIcon(iconoN);
+                   JbtnMochis.setEnabled(false);
+                   break;
+               case 7:
+                   iconoN = new ImageIcon ("src\\Imagenes\\BubbleWaffleN.png");
+                   JbtnWafle.setIcon(iconoN);
+                   JbtnWafle.setEnabled(false);  
+                   break;
+                   default:
+                   break;
+           }
+           }
+                         }
+        } catch (SQLException ex) {
+            System.out.println(ex);
+        }
      }
+                     
+     
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -585,7 +644,11 @@ public class Ventana extends javax.swing.JFrame {
     }//GEN-LAST:event_JbtnEliminarActionPerformed
 
     private void JbtnEnviarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JbtnEnviarActionPerformed
-        ConfirmacionTasSeguro();
+        try {
+            ConfirmacionTasSeguro();
+        } catch (SQLException ex) {
+            Logger.getLogger(Ventana.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }//GEN-LAST:event_JbtnEnviarActionPerformed
 
     private void jbtnIngreRamenActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbtnIngreRamenActionPerformed
@@ -642,6 +705,76 @@ public class Ventana extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_jbtnIngreMochisActionPerformed
 
+        // Método para obtener la cantidad disponible de un ingrediente en el almacén
+    public static double obtenerCantidadDisponible(int idIngrediente) throws SQLException {
+        double cantidadDisponible = 0;
+        String query = "SELECT cantidad FROM ingredientesalmacen WHERE idIngrediente = ?";
+        
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(query)) {
+
+            ps.setInt(1, idIngrediente);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                cantidadDisponible = rs.getDouble("cantidad");
+            }
+        } catch (SQLException e) {
+            throw new SQLException("Error al obtener la cantidad disponible del ingrediente", e);
+        }
+
+        return cantidadDisponible;
+    }
+
+    // Método para obtener los ingredientes requeridos para un platillo
+    public static Map<Integer, Double> obtenerIngredientesRequeridos(int idPlatillo) throws SQLException {
+        Map<Integer, Double> ingredientesRequeridos = new HashMap<>();
+
+        // Consulta para obtener los ingredientes necesarios para el platillo por su ID
+        String query = "SELECT idIngrediente, cantidad FROM ingredientesporplatillo WHERE idPlatillo = ?";
+        
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(query)) {
+
+            ps.setInt(1, idPlatillo);
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                int idIngrediente = rs.getInt("idIngrediente");
+                double cantidadRequerida = rs.getDouble("cantidad");
+                ingredientesRequeridos.put(idIngrediente, cantidadRequerida);
+            }
+        } catch (SQLException e) {
+            throw new SQLException("Error al obtener los ingredientes requeridos para el platillo", e);
+        }
+
+        return ingredientesRequeridos;
+    }
+
+    // Método para verificar la disponibilidad total de ingredientes para un platillo específico
+    public static boolean verificarDisponibilidadTotalPlatillo(int idPlatillo) throws SQLException {
+        boolean existencia = true;
+        Map<Integer, Double> ingredientesRequeridos = obtenerIngredientesRequeridos(idPlatillo);
+        // Verificar la disponibilidad total de cada ingrediente requerido para el platillo
+        for (Map.Entry<Integer, Double> entry : ingredientesRequeridos.entrySet()) {
+            int idIngrediente = entry.getKey();
+            double cantidadRequerida = entry.getValue();
+            double cantidadDisponible = obtenerCantidadDisponible(idIngrediente);
+            System.out.println("id:"+idIngrediente+ "Cantidad " + cantidadRequerida + " CantidadDispo"+cantidadDisponible );
+            if (cantidadDisponible < cantidadRequerida) {
+                 System.out.println("No hay suficientes ingredientes para el platillo con ID " + idPlatillo);
+                existencia = false;
+                break;
+           } else {
+                System.out.println("Hay suficientes ingredientes para el platillo con ID " + idPlatillo);
+            }
+        }
+       return existencia;
+    }
+    
+    
+    
+    
       private void AgarrarIngrediente() throws SQLException {
         int idPlatillo = id; // Obtienes el ID del platillo desde algún lugar
         JFrame ventanaIngredientes = new JFrame("Ingredientes");
@@ -680,6 +813,8 @@ public class Ventana extends javax.swing.JFrame {
 return 1;
     }
       */
+      
+     
 
 
     public void agregarALista(String elemento) {
@@ -729,7 +864,7 @@ return 1;
     return 0.0;
     }
     
-    private void ConfirmacionTasSeguro(){
+    private void ConfirmacionTasSeguro() throws SQLException{
         double Iva;
         double Final;
         Iva = total * 0.16;
@@ -748,10 +883,80 @@ return 1;
         }
     }
             
-    private void mostrarVentanaDeConfirmacion() {
-    JOptionPane.showMessageDialog(this, "La orden ha sido enviada con éxito.", "Confirmación", JOptionPane.INFORMATION_MESSAGE);
-}
+    private void mostrarVentanaDeConfirmacion() throws SQLException {
+    
+    LocalDate currentDate = LocalDate.now();
+                LocalTime currentTime = LocalTime.now();
 
+                // Formateando la fecha y la hora
+                DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+                DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+                String formattedDate = currentDate.format(dateFormatter);
+                String formattedTime = currentTime.format(timeFormatter);
+    JOptionPane.showMessageDialog(this, "La orden ha sido enviada con éxito. \n Fecha:"+formattedDate+"\n Hora"+formattedTime, "Confirmación", JOptionPane.INFORMATION_MESSAGE);
+    
+               //   PlatillosARestar();
+}
+    /*
+    public void PlatillosARestar() throws SQLException{
+          // List<String> platillosSeleccionados = platillo.getSelectedValuesList();
+            List<String> platillos = obtenerPlatillos();
+                if (!platillos.isEmpty()) {
+                    // Realizar acciones para cada platillo seleccionado
+                        // Aquí se puede realizar la lógica específica para cada platillo seleccionado
+                        boolean suficientesIngredientes = verificarIngredientesPlatillos(platillos);
+                        if (suficientesIngredientes) {
+                        JOptionPane.showMessageDialog(null, "Suficientes ingredientes para los platillos seleccionados");
+                        // Aquí puedes ejecutar la lógica adicional si hay suficientes ingredientes
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Algunos ingredientes se han agotado para los platillos seleccionados");
+                        // Realizar acciones si no hay suficientes ingredientes
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(null, "La lista de platillos está vacía");
+                }
+               
+    }
+    
+    private List<String> obtenerPlatillos() {
+        List<String> platillos = new ArrayList<>();
+        ListModel<String> model = platillo.getModel();
+        for (int i = 0; i < model.getSize(); i++) {
+            platillos.add(model.getElementAt(i));
+        }
+        return platillos;
+    }
+    
+    private boolean verificarIngredientesPlatillos(List<String> platillos) {
+        boolean suficientesIngredientes = true;
+
+        try (Connection conn = getConnection()) {
+            for (String nombrePlatillo : platillos) {
+                int idPlatillo = nombrePlatilloID.getOrDefault(nombrePlatillo, -1);
+                if (idPlatillo != -1) {
+                    var ingredientesDisponibles = conexion.verificarIngredientes(conn, idPlatillo);
+                    if (!ingredientesDisponibles) {
+                        suficientesIngredientes = false;
+                        break;
+                    }
+                } else {
+                    System.out.println("No se encontró ID para el platillo: " + nombrePlatillo);
+                    suficientesIngredientes = false;
+                    break;
+                }
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            suficientesIngredientes = false;
+        }
+        return suficientesIngredientes;
+    }
+   
+   */
+    
+    
+    
+    
     private void limpiarLista() {
     modeloLista.removeAllElements();
     total = 0;
@@ -786,8 +991,10 @@ return 1;
 
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 new Ventana().setVisible(true);
+                
             }
         });
     }

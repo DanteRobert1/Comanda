@@ -3,6 +3,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package Conexion;
+import proyectoborra2.Ventana;
 import com.mysql.cj.jdbc.DatabaseMetaData;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -13,16 +14,23 @@ import java.sql.Statement;
 import java.util.Scanner;
 import java.sql.ResultSetMetaData;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  *
  * @author Daniel
  */
 public class ConexionBD {
+    
     private static final String JDBC_URL = "jdbc:mysql://148.211.124.58:3306/neotokio";
     private static final String JDBC_USER = "neotokio";
     private static final String JDBC_PASSWORD = "jFrB)(A!_s1AYwj0";
-
+/*
+    private static final String JDBC_URL = "jdbc:mysql://Rayoscompany.com:3306/Proyecto";
+    private static final String JDBC_USER = "java";
+    private static final String JDBC_PASSWORD = "Java_proyecto123220224";
+  */  
     public static Connection getConnection() {
         Connection conn = null;
         try {
@@ -94,6 +102,67 @@ return ingredientes;
     }
 
 
+        
+        /*
+        public static void obtenerIngredientesPorIdPlatillo(int idPlatillo) {
+    // Consulta para obtener los ingredientes necesarios para el platillo por su ID
+    String query =  "SELECT i.nombre, p.cantidad FROM ingrediente i JOIN ingredientesporplatillo p ON i.idIngrediente = p.idIngrediente WHERE p.idPlatillo = ?";
+    String querys =  "SELECT i.nombre, q.cantidad FROM ingrediente i JOIN ingredientesalmacen p ON i.idIngrediente = p.idIngrediente "
+            + "join ingredientesporplatillo q on i.idIngrediente = q.idIngrediente WHERE p.idPlatillo = ?";
+    
+    try (Connection conn = getConnection();
+         PreparedStatement ps = conn.prepareStatement(query)) {
+
+        ps.setInt(1, idPlatillo);
+        ResultSet rs = ps.executeQuery();
+
+        while (rs.next()) {
+            int idIngrediente = rs.getInt("idIngrediente");
+            double cantidadRequerida = rs.getDouble("cantidadRequerida");
+            String nombreIngrediente = rs.getString("nombre");
+
+            System.out.println("Para el platillo con ID " + idPlatillo + ", se requiere " + cantidadRequerida + " unidades de " + nombreIngrediente + " (ID: " + idIngrediente + ")");
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+            */
+       
+
+            
+        
+        /*
+     public boolean verificarIngredientes(Connection conn, int idPlatillo) throws SQLException {
+        boolean ingredientesDisponibles = false;
+
+        // Consulta para obtener la cantidad de ingredientes requeridos por el platillo por su ID
+        String queryIngredientesRequeridos = "SELECT COUNT(cantidad) FROM ingredientesporplatillo WHERE id_platillo = ?";
+        PreparedStatement psIngredientesRequeridos = conn.prepareStatement(queryIngredientesRequeridos);
+        psIngredientesRequeridos.setInt(1, idPlatillo);
+        ResultSet rsIngredientesRequeridos = psIngredientesRequeridos.executeQuery();
+
+        int cantidadIngredientesRequeridos = 0;
+        if (rsIngredientesRequeridos.next()) {
+            cantidadIngredientesRequeridos = rsIngredientesRequeridos.getInt("cantidad_ingredientes_requeridos");
+        }
+
+        // Consulta para obtener la cantidad total de ingredientes disponibles por su ID
+        String queryIngredientesTotales = "SELECT COUNT(cantidad) FROM ingredientesalmacen";
+        PreparedStatement psIngredientesTotales = conn.prepareStatement(queryIngredientesTotales);
+        ResultSet rsIngredientesTotales = psIngredientesTotales.executeQuery();
+
+        int cantidadIngredientesTotales = 0;
+        if (rsIngredientesTotales.next()) {
+            cantidadIngredientesTotales = rsIngredientesTotales.getInt("cantidad_ingredientes_totales");
+        }
+
+        if (cantidadIngredientesRequeridos <= cantidadIngredientesTotales) {
+            ingredientesDisponibles = true;
+        }
+
+        return ingredientesDisponibles;
+    } 
+        */
     public static void main(String[] args) {
         Connection connection = getConnection();
         if (connection != null) {
