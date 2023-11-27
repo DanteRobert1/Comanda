@@ -61,7 +61,7 @@ public class Ventana extends javax.swing.JFrame {
     
      private void inicializarObjetos() {
                      try {
-                         for (int i = 1; i <= 8; i++) {
+                         for (int i = 1; i <= 7; i++) {
            boolean existencia = verificarDisponibilidadTotalPlatillo(i);
            if (!existencia){
                ImageIcon iconoN;
@@ -104,8 +104,38 @@ public class Ventana extends javax.swing.JFrame {
         } catch (SQLException ex) {
             System.out.println(ex);
         }
+        try{
+                         for (int j = 1; j <= 4; j++) {
+           boolean existenciaB = verificarDisponibilidadTotalBebidas(j);
+           if (!existenciaB){
+               ImageIcon iconoN;
+           switch (j){
+               case 1:
+                   iconoN = new ImageIcon ("src\\Imagenes\\TeVerdeN.png");
+                   JbtnTé.setIcon(iconoN);
+                   JbtnTé.setEnabled(false);
+                   break;
+               case 2:
+                   iconoN = new ImageIcon ("src\\Imagenes\\SakeN.png");
+                   JbtnSake.setIcon(iconoN);
+                   JbtnSake.setEnabled(false);
+                   break;
+               case 3:
+                   iconoN = new ImageIcon ("src\\Imagenes\\CalpisN.png");
+                   JbtnCalpis.setIcon(iconoN);
+                   JbtnCalpis.setEnabled(false);
+                   break;
+               case 4:
+                   iconoN = new ImageIcon ("src\\Imagenes\\RefrescoN.png");
+                   JbtnRefresco.setIcon(iconoN);
+                   JbtnRefresco.setEnabled(false);
+                         }
+           }
+                         }
+                         }catch(SQLException ex){
+                            System.out.println(ex);     
+                                 }
      }
-                     
      
     /**
      * This method is called from within the constructor to initialize the form.
@@ -760,17 +790,54 @@ public class Ventana extends javax.swing.JFrame {
             int idIngrediente = entry.getKey();
             double cantidadRequerida = entry.getValue();
             double cantidadDisponible = obtenerCantidadDisponible(idIngrediente);
-            System.out.println("id:"+idIngrediente+ "Cantidad " + cantidadRequerida + " CantidadDispo"+cantidadDisponible );
+            
+            //System.out.println("id:"+idIngrediente+ "Cantidad " + cantidadRequerida + " CantidadDispo"+cantidadDisponible );
             if (cantidadDisponible < cantidadRequerida) {
-                 System.out.println("No hay suficientes ingredientes para el platillo con ID " + idPlatillo);
+                // System.out.println("No hay suficientes ingredientes para el platillo con ID " + idPlatillo);
                 existencia = false;
                 break;
            } else {
-                System.out.println("Hay suficientes ingredientes para el platillo con ID " + idPlatillo);
+                //System.out.println("Hay suficientes ingredientes para el platillo con ID " + idPlatillo);
             }
         }
        return existencia;
     }
+    
+    public static double obtenerCantidadDisponibleBebida(int idBebida) throws SQLException {
+        double cantidadDisponible = 0;
+        String query = "SELECT cantidad FROM bebidasalmacen WHERE idBebida = ?";
+        
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(query)) {
+
+            ps.setInt(1, idBebida);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                cantidadDisponible = rs.getDouble("cantidad");
+            }
+        } catch (SQLException e) {
+            throw new SQLException("Error al obtener la cantidad disponible de la bebida", e);
+        }
+
+        return cantidadDisponible;
+    }
+    
+    public static boolean verificarDisponibilidadTotalBebidas(int idBebida) throws SQLException {
+    boolean existenciaB = true;
+    double cantidadDisponible = obtenerCantidadDisponibleBebida(idBebida);
+    if (cantidadDisponible <=0 ) {
+                 // System.out.println("No hay suficientes bebidas para el platillo con ID " + idBebida);
+                existenciaB = false;
+           } else {
+                // System.out.println("Hay suficientes bebidas para el platillo con ID " + idBebida);
+            }
+        
+       return existenciaB;
+    }
+    
+    
+    
     
     
     
@@ -873,7 +940,7 @@ return 1;
 
         if (confirmacion == JOptionPane.YES_OPTION) {
             // El usuario ha hecho clic en "Sí", realiza la acción que deseas
-            mostrarVentanaDeConfirmacion();
+            mostrarVentanaDeConfirmacion(Final);
             limpiarLista();
         } else {
             // El usuario ha hecho clic en "No" o ha cerrado el diálogo
@@ -883,7 +950,7 @@ return 1;
         }
     }
             
-    private void mostrarVentanaDeConfirmacion() throws SQLException {
+    private void mostrarVentanaDeConfirmacion(double Final) throws SQLException {
     
     LocalDate currentDate = LocalDate.now();
                 LocalTime currentTime = LocalTime.now();
@@ -893,66 +960,10 @@ return 1;
                 DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
                 String formattedDate = currentDate.format(dateFormatter);
                 String formattedTime = currentTime.format(timeFormatter);
-    JOptionPane.showMessageDialog(this, "La orden ha sido enviada con éxito. \n Fecha:"+formattedDate+"\n Hora"+formattedTime, "Confirmación", JOptionPane.INFORMATION_MESSAGE);
-    
-               //   PlatillosARestar();
-}
-    /*
-    public void PlatillosARestar() throws SQLException{
-          // List<String> platillosSeleccionados = platillo.getSelectedValuesList();
-            List<String> platillos = obtenerPlatillos();
-                if (!platillos.isEmpty()) {
-                    // Realizar acciones para cada platillo seleccionado
-                        // Aquí se puede realizar la lógica específica para cada platillo seleccionado
-                        boolean suficientesIngredientes = verificarIngredientesPlatillos(platillos);
-                        if (suficientesIngredientes) {
-                        JOptionPane.showMessageDialog(null, "Suficientes ingredientes para los platillos seleccionados");
-                        // Aquí puedes ejecutar la lógica adicional si hay suficientes ingredientes
-                    } else {
-                        JOptionPane.showMessageDialog(null, "Algunos ingredientes se han agotado para los platillos seleccionados");
-                        // Realizar acciones si no hay suficientes ingredientes
-                    }
-                } else {
-                    JOptionPane.showMessageDialog(null, "La lista de platillos está vacía");
-                }
-               
-    }
-    
-    private List<String> obtenerPlatillos() {
-        List<String> platillos = new ArrayList<>();
-        ListModel<String> model = platillo.getModel();
-        for (int i = 0; i < model.getSize(); i++) {
-            platillos.add(model.getElementAt(i));
-        }
-        return platillos;
-    }
-    
-    private boolean verificarIngredientesPlatillos(List<String> platillos) {
-        boolean suficientesIngredientes = true;
-
-        try (Connection conn = getConnection()) {
-            for (String nombrePlatillo : platillos) {
-                int idPlatillo = nombrePlatilloID.getOrDefault(nombrePlatillo, -1);
-                if (idPlatillo != -1) {
-                    var ingredientesDisponibles = conexion.verificarIngredientes(conn, idPlatillo);
-                    if (!ingredientesDisponibles) {
-                        suficientesIngredientes = false;
-                        break;
-                    }
-                } else {
-                    System.out.println("No se encontró ID para el platillo: " + nombrePlatillo);
-                    suficientesIngredientes = false;
-                    break;
-                }
-            }
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-            suficientesIngredientes = false;
-        }
-        return suficientesIngredientes;
-    }
+    JOptionPane.showMessageDialog(this, "La orden ha sido enviada con éxito. \n Fecha:"+formattedDate+"\n "
+            + "Hora"+formattedTime+"\n TotalCnIva"+Final+"\n TotalSnIva"+total,"Confirmación", JOptionPane.INFORMATION_MESSAGE);
    
-   */
+}
     
     
     
