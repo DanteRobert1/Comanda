@@ -16,6 +16,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,7 +44,10 @@ public class Ventana extends javax.swing.JFrame {
     ConexionBD conexion;    
     private DefaultListModel<String> modeloLista;
     private Map<String, Integer> nombrePlatilloID;
+    private Map<Integer, String> idNombrePlatillo; 
+    private Map<String, Double> preciosPorPlatillo;
     private int id;
+    private int idComanda;
     private int idBebidas;
     private double total = 0.0; // Variable para almacenar el total acumulado
     private double totalIva = 0.0;
@@ -51,6 +55,16 @@ public class Ventana extends javax.swing.JFrame {
      * Creates new form Ventana
      */
     public Ventana() {
+        idNombrePlatillo = new HashMap<>();
+        preciosPorPlatillo = new HashMap<>();
+
+        // Simular llenar los mapas 'idNombrePlatillo' y 'preciosPorPlatillo' con datos de platillos
+        idNombrePlatillo.put(1, "Ramen");
+        idNombrePlatillo.put(2, "Curry");
+        // Agrega más platillos si es necesario
+
+        preciosPorPlatillo.put("Ramen", 9.99);
+        preciosPorPlatillo.put("Curry", 8.49);
         
         initComponents();
         inicializarObjetos();
@@ -67,7 +81,7 @@ public class Ventana extends javax.swing.JFrame {
                ImageIcon iconoN;
            switch (i){
                case 1:
-                   iconoN = new ImageIcon ("src\\Imagenes\\RamenN.png");
+                   iconoN = new ImageIcon ("src\\Imagenes\\RamenN.jpg");
                    JbtnRamen.setIcon(iconoN);
                    JbtnRamen.setEnabled(false);
                    break;
@@ -77,17 +91,17 @@ public class Ventana extends javax.swing.JFrame {
                    JbtnCurry.setEnabled(false);
                    break;
                case 3:
-                   iconoN = new ImageIcon ("src\\Imagenes\\SushiN.png");
+                   iconoN = new ImageIcon ("src\\Imagenes\\SushiN.jpg");
                    JbtnSushi.setIcon(iconoN);
                    JbtnSushi.setEnabled(false);
                    break;
                case 4:
-                   iconoN = new ImageIcon ("src\\Imagenes\\SalmonMarinadoN.png");
+                   iconoN = new ImageIcon ("src\\Imagenes\\SalmonMarinadoN.jpg");
                    JbtnSalmon.setIcon(iconoN);
                    JbtnSalmon.setEnabled(false);
                    break;
                case 6:
-                   iconoN = new ImageIcon ("src\\Imagenes\\MochisN.png");
+                   iconoN = new ImageIcon ("src\\Imagenes\\MochisN.jpg");
                    JbtnMochis.setIcon(iconoN);
                    JbtnMochis.setEnabled(false);
                    break;
@@ -622,35 +636,35 @@ public class Ventana extends javax.swing.JFrame {
 
     private void JbtnCurryActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JbtnCurryActionPerformed
        id = 2;
-        agregarALista("Curry");
+        agregarALista("Curry Japonés");
        AgarrarPrecios();
       JlblTotal.setText("$"+ total);
     }//GEN-LAST:event_JbtnCurryActionPerformed
 
     private void JbtnSushiActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JbtnSushiActionPerformed
         id= 3; 
-        agregarALista("Sushi");
+        agregarALista("Sushi de carne y bacon");
          AgarrarPrecios();
       JlblTotal.setText("$"+ total);
     }//GEN-LAST:event_JbtnSushiActionPerformed
 
     private void JbtnSalmonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JbtnSalmonActionPerformed
         id = 4;
-        agregarALista("Salmon");
+        agregarALista("Salmon marinado japonés");
         AgarrarPrecios();
       JlblTotal.setText("$"+ total);
     }//GEN-LAST:event_JbtnSalmonActionPerformed
 
     private void JbtnMochisActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JbtnMochisActionPerformed
         id = 6;
-        agregarALista("Mochis");
+        agregarALista("Mochis de coco");
         AgarrarPrecios();
       JlblTotal.setText("$"+ total);
     }//GEN-LAST:event_JbtnMochisActionPerformed
 
     private void JbtnWafleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JbtnWafleActionPerformed
         id = 7;
-        agregarALista("Waffle");
+        agregarALista("Bubble Waffle");
         AgarrarPrecios();
       JlblTotal.setText("$"+ total);
     }//GEN-LAST:event_JbtnWafleActionPerformed
@@ -921,7 +935,7 @@ return 1;
         return 80.0;
     }else if (platillo.equals("Refresco")) {
         return 20.0;
-    }else if (platillo.equals("TeVerde")) {
+    }else if (platillo.equals("Te Verde")) {
         return 60.0;
     }else if (platillo.equals("Sake")) {
         return 120.0;
@@ -941,7 +955,6 @@ return 1;
         if (confirmacion == JOptionPane.YES_OPTION) {
             // El usuario ha hecho clic en "Sí", realiza la acción que deseas
             mostrarVentanaDeConfirmacion(Final);
-            limpiarLista();
         } else {
             // El usuario ha hecho clic en "No" o ha cerrado el diálogo
             // Puedes realizar alguna otra acción si lo deseas
@@ -951,7 +964,7 @@ return 1;
     }
             
     private void mostrarVentanaDeConfirmacion(double Final) throws SQLException {
-    
+    idComanda++;
     LocalDate currentDate = LocalDate.now();
                 LocalTime currentTime = LocalTime.now();
 
@@ -962,8 +975,181 @@ return 1;
                 String formattedTime = currentTime.format(timeFormatter);
     JOptionPane.showMessageDialog(this, "La orden ha sido enviada con éxito. \n Fecha:"+formattedDate+"\n "
             + "Hora"+formattedTime+"\n TotalCnIva"+Final+"\n TotalSnIva"+total,"Confirmación", JOptionPane.INFORMATION_MESSAGE);
-   
+    
+    /*
+    --------------------------
+    Connection conn = ConexionBD.getConnection();
+            String query = "INSERT INTO recibo (idComanda, fecha, hora, totalSinIVA, totalConIVA) VALUES (?, ?, ?, ?, ?)";
+
+            try (PreparedStatement pstmt = conn.prepareStatement(query)) {
+                pstmt.setInt(1, idComanda);
+                pstmt.setString(2, formattedDate);
+                pstmt.setString(3, formattedTime);
+                pstmt.setDouble(4, total);
+                pstmt.setDouble(5, Final);
+
+                pstmt.executeUpdate();
+                // La inserción se ha realizado con éxito
+            }
+         String quers = "INSERT INTO comanda (fecha, hora) VALUES (?, ?)";
+       try (PreparedStatement psps = conn.prepareStatement(quers)) {
+                psps.setString(1, formattedDate);
+                psps.setString(2, formattedTime);
+                psps.executeUpdate();
+                // La inserción se ha realizado con éxito  
+            }
+    -----------------------
+    */
+    System.out.println("leido Princi");
+       enviarComanda(juntarLista());
+       limpiarLista();
+    }
+
+    
+            
+            
+      
+      
+     
+            
+       
+       /*
+      List<String> platillos = Collections.list(modeloLista.elements());
+
+        // Crear un mapa para contar la cantidad de cada platillo
+        Map<String, Integer> cantidadPorPlatillo = new HashMap<>();
+        for (String platillo : platillos) {
+            cantidadPorPlatillo.put(platillo, cantidadPorPlatillo.getOrDefault(platillo, 0) + 1);
+        }
+        
+         for (Map.Entry<String, Integer> entry : cantidadPorPlatillo.entrySet()) {
+                    String nombrePlatillo = entry.getKey();
+                    int cantidad = entry.getValue();
+                    int idPlatillo = obtenerIDPorNombre(nombrePlatillo);
+
+                    double precioUnitario = preciosPorPlatillo.get(nombrePlatillo);
+                    double precioTotal = cantidad * precioUnitario;
+
+                    // Mostrar los detalles por consola (aquí se debería enviar a la base de datos)
+                    System.out.println("Platillo: " + nombrePlatillo +
+                            ", ID: " + idPlatillo +
+                            ", Cantidad: " + cantidad +
+                            ", Precio Unitario: " + precioUnitario +
+                            ", Precio Total: " + precioTotal);
+        
 }
+    }
+    
+     private int obtenerIDPorNombre(String nombrePlatillo) {
+        for (Map.Entry<Integer, String> entry : idNombrePlatillo.entrySet()) {
+            if (entry.getValue().equals(nombrePlatillo)) {
+                return entry.getKey();
+            }
+        }
+        return -1; // Manejo del caso en el que no se encuentre el platillo
+    }
+       
+       */
+     
+    
+    public ArrayList<String[]> juntarLista() {
+    ArrayList<String[]> lista = new ArrayList<>();
+
+    for (int i = 0; i < modeloLista.getSize(); i++) {
+        String orden = modeloLista.getElementAt(i);
+        boolean encontrado = false;
+
+        // Comprobar si el elemento ya está en la lista
+        for (String[] copia : lista) {
+            if (copia[0].equals(orden)) {
+                encontrado = true;
+                break;
+            }
+        }
+
+        // Si no está en la lista, agregarlo junto con su recuento
+        if (!encontrado) {
+            int cuenta = 0;
+            for (int j = 0; j < modeloLista.getSize(); j++) {
+                if (modeloLista.getElementAt(j).equals(orden)) {
+                    cuenta++;
+                }
+            }
+            String[] arreglo = {orden, String.valueOf(cuenta)};
+            lista.add(arreglo);
+        }
+    }
+
+    return lista;
+}
+    
+    private static void enviarComanda(ArrayList<String[]> lista) throws SQLException {
+          int idCma = 2;
+          
+    for (int i = 0; i < lista.size(); i++) {
+        try (Connection conn = getConnection()) {
+            String nombrePlatillo = lista.get(i)[0];
+            int cantidad = Integer.parseInt(lista.get(i)[1]);
+
+            String queryPla = "INSERT INTO platillosporcomanda (idComanda, idPlatillo, cantidad, precioUnitario) "
+                            + "VALUES (?, (SELECT idPlatillo FROM platillo WHERE nombre = ?), ?, (SELECT precio FROM platillo WHERE nombre = ?))";
+            
+            PreparedStatement psPlatillos = conn.prepareStatement(queryPla);
+            psPlatillos.setInt(1, idCma);
+            psPlatillos.setString(2, nombrePlatillo);
+            psPlatillos.setInt(3, cantidad);
+            psPlatillos.setString(4, nombrePlatillo);
+            psPlatillos.executeUpdate();
+        } catch (SQLException ex) {
+            System.out.println("Error al insertar en platillosporcomanda: " + ex);
+        }
+    }
+    for (int i = 0; i < lista.size(); i++) {
+        try (Connection conn = getConnection()) {
+            String nombreBebida = lista.get(i)[0];
+            int cantidad = Integer.parseInt(lista.get(i)[1]);
+
+            // Insertar en la tabla bebidasporcomanda
+            String queryBebidas = "INSERT INTO bebidaporcomanda VALUES (?, (SELECT idBebida FROM bebida WHERE nombre = ?), ?, (SELECT precio FROM bebida WHERE nombre = ?))";
+            PreparedStatement psBebidas = conn.prepareStatement(queryBebidas);
+            psBebidas.setInt(1, idCma);
+            psBebidas.setString(2, nombreBebida);
+            psBebidas.setInt(3, cantidad);
+            psBebidas.setString(4, nombreBebida);
+            psBebidas.executeUpdate();
+        } catch (SQLException ex) {
+            System.out.println("Error al insertar en bebidasporcomanda: " + ex);
+        }
+    }
+          
+}
+   
+    
+    /*
+            private static void enviarComanda(ArrayList<String[]> lista) throws SQLException{
+        int idComanda = 0;
+        for (int i=0; i<lista.size();i++){
+            try (Connection conn = getConnection()) {
+                String query = "INSERT INTO platillosporcomanda values("+idComanda+",(SELECT id from platillo where nombre =  " + lista.get(i)[0]+ "), "+ lista.get(i)[1] + ", (SELECT precio from platillo where nombre = " + lista.get(i)[0]+";";
+                PreparedStatement ps = conn.prepareStatement(query);
+                ps.executeQuery();
+            }
+            catch (SQLException ex){
+                
+            }
+        }
+        for (int i=0; i<lista.size();i++){
+            try (Connection conn = getConnection()) {
+                String query = "INSERT INTO bebidasporcomanda values("+idComanda+",(SELECT id from bebida where nombre =  " + lista.get(i)[0]+ "), "+ lista.get(i)[1] + ", (SELECT precio from bebida where nombre = " + lista.get(i)[0]+";";
+                PreparedStatement ps = conn.prepareStatement(query);
+                ps.executeQuery();
+            }
+            catch (SQLException ex){   
+                 System.out.println("Error1: " + ex);
+            }
+        }
+    }
+    */
     
     
     
