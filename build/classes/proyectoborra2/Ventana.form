@@ -434,7 +434,7 @@
               <Color blue="99" green="ff" red="99" type="rgb"/>
             </Property>
             <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-              <Image iconType="3" name="/Imagenes/RamenD.jpg"/>
+              <Image iconType="3" name="/ImagenesNew/Imagenes/RamenD.png"/>
             </Property>
             <Property name="focusPainted" type="boolean" value="false"/>
             <Property name="focusable" type="boolean" value="false"/>
@@ -447,7 +447,7 @@
         <Component class="javax.swing.JButton" name="JbtnCurry">
           <Properties>
             <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-              <Image iconType="3" name="/Imagenes/CurryD.png"/>
+              <Image iconType="3" name="/ImagenesNew/Imagenes/CurryD.png"/>
             </Property>
           </Properties>
           <Events>
@@ -457,7 +457,7 @@
         <Component class="javax.swing.JButton" name="JbtnSushi">
           <Properties>
             <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-              <Image iconType="3" name="/Imagenes/SushiD.jpg"/>
+              <Image iconType="3" name="/ImagenesNew/Imagenes/SushiD.png"/>
             </Property>
           </Properties>
           <Events>
@@ -467,7 +467,7 @@
         <Component class="javax.swing.JButton" name="JbtnSalmon">
           <Properties>
             <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-              <Image iconType="3" name="/Imagenes/SalmonMarinadoD.jpg"/>
+              <Image iconType="3" name="/ImagenesNew/Imagenes/SalmonMarinadoD.png"/>
             </Property>
           </Properties>
           <Events>
@@ -488,7 +488,7 @@
         <Component class="javax.swing.JButton" name="JbtnMochis">
           <Properties>
             <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-              <Image iconType="3" name="/Imagenes/MochisD.jpg"/>
+              <Image iconType="3" name="/ImagenesNew/Imagenes/MochisD.png"/>
             </Property>
           </Properties>
           <Events>
@@ -498,7 +498,7 @@
         <Component class="javax.swing.JButton" name="JbtnWafle">
           <Properties>
             <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-              <Image iconType="3" name="/Imagenes/BubbleWaffleD.png"/>
+              <Image iconType="3" name="/ImagenesNew/Imagenes/BubbleWaffleD.png"/>
             </Property>
           </Properties>
           <Events>
@@ -533,7 +533,7 @@
               <Color blue="99" green="ff" red="99" type="rgb"/>
             </Property>
             <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-              <Image iconType="3" name="/Imagenes/RefrescoD.png"/>
+              <Image iconType="3" name="/ImagenesNew/Imagenes/RefrescoD.png"/>
             </Property>
           </Properties>
           <Events>
@@ -549,7 +549,7 @@
               <Color blue="99" green="ff" red="99" type="rgb"/>
             </Property>
             <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-              <Image iconType="3" name="/Imagenes/CalpisD.png"/>
+              <Image iconType="3" name="/ImagenesNew/Imagenes/CalpisD.png"/>
             </Property>
           </Properties>
           <Events>
@@ -562,7 +562,7 @@
               <Color blue="99" green="ff" red="99" type="rgb"/>
             </Property>
             <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-              <Image iconType="3" name="/Imagenes/TeVerdeD.png"/>
+              <Image iconType="3" name="/ImagenesNew/Imagenes/TeVerdeD.png"/>
             </Property>
           </Properties>
           <Events>
@@ -575,7 +575,7 @@
               <Color blue="99" green="ff" red="99" type="rgb"/>
             </Property>
             <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-              <Image iconType="3" name="/Imagenes/SakeD.png"/>
+              <Image iconType="3" name="/ImagenesNew/Imagenes/SakeD.png"/>
             </Property>
           </Properties>
           <Events>
@@ -588,7 +588,7 @@
               <Color blue="ff" green="ff" red="ff" type="rgb"/>
             </Property>
             <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-              <Image iconType="3" name="/Imagenes/Ingredientes.png"/>
+              <Image iconType="3" name="/ImagenesNew/Imagenes/Ingredientes.png"/>
             </Property>
             <Property name="contentAreaFilled" type="boolean" value="false"/>
           </Properties>
@@ -602,7 +602,7 @@
               <Color blue="ff" green="ff" red="ff" type="rgb"/>
             </Property>
             <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-              <Image iconType="3" name="/Imagenes/Ingredientes.png"/>
+              <Image iconType="3" name="/ImagenesNew/Imagenes/Ingredientes.png"/>
             </Property>
             <Property name="contentAreaFilled" type="boolean" value="false"/>
           </Properties>
@@ -616,7 +616,7 @@
               <Color blue="ff" green="ff" red="ff" type="rgb"/>
             </Property>
             <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-              <Image iconType="3" name="/Imagenes/Ingredientes.png"/>
+              <Image iconType="3" name="/ImagenesNew/Imagenes/Ingredientes.png"/>
             </Property>
             <Property name="contentAreaFilled" type="boolean" value="false"/>
           </Properties>
@@ -630,7 +630,7 @@
               <Color blue="ff" green="ff" red="ff" type="rgb"/>
             </Property>
             <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-              <Image iconType="3" name="/Imagenes/Ingredientes.png"/>
+              <Image iconType="3" name="/ImagenesNew/Imagenes/Ingredientes.png"/>
             </Property>
             <Property name="contentAreaFilled" type="boolean" value="false"/>
           </Properties>
@@ -644,7 +644,7 @@
               <Color blue="ff" green="ff" red="ff" type="rgb"/>
             </Property>
             <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-              <Image iconType="3" name="/Imagenes/Ingredientes.png"/>
+              <Image iconType="3" name="/ImagenesNew/Imagenes/Ingredientes.png"/>
             </Property>
             <Property name="contentAreaFilled" type="boolean" value="false"/>
           </Properties>
@@ -658,7 +658,7 @@
               <Color blue="ff" green="ff" red="ff" type="rgb"/>
             </Property>
             <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-              <Image iconType="3" name="/Imagenes/Ingredientes.png"/>
+              <Image iconType="3" name="/ImagenesNew/Imagenes/Ingredientes.png"/>
             </Property>
             <Property name="contentAreaFilled" type="boolean" value="false"/>
           </Properties>

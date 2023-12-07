@@ -7,13 +7,17 @@ import java.sql.Connection;
 import Conexion.ConexionBD;
 import static Conexion.ConexionBD.getConnection;
 import java.awt.BorderLayout;
+import java.awt.Desktop;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -37,7 +41,11 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.ListModel;
 import javax.swing.SwingUtilities;
-
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.font.PDType1Font;
+import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
 
 /**
  *
@@ -54,18 +62,13 @@ public class Ventana extends javax.swing.JFrame {
     private static int idComanda;
     private static int folioReserva;
     private static int idCliente;
+    private static int idRecibo;
     private int idBebidas;
     private double total = 0.0; // Variable para almacenar el total acumulado
     private double totalIva = 0.0;
     private static int idMesa;
     private static int idSucursal;
-    /////////////////////////////////////////////////////////////////////////////7
-    private JTextField folioReservaField;
-    private JTextField idClienteField;
-    private JTextField nombreField;
-    private JTextField apellidoField;
-    private JTextField telefonoField;
-    private JTextField correoField;
+
     
     /**
      * Creates new form Ventana
@@ -89,32 +92,32 @@ public class Ventana extends javax.swing.JFrame {
                ImageIcon iconoN;
            switch (i){
                case 1:
-                   iconoN = new ImageIcon ("src\\Imagenes\\RamenN.jpg");
+                   iconoN = new ImageIcon ("src\\ImagenesNew\\Imagenes\\RamenN.png");
                    JbtnRamen.setIcon(iconoN);
                    JbtnRamen.setEnabled(false);
                    break;
                case 2:
-                   iconoN = new ImageIcon ("src\\Imagenes\\CurryN.png");
+                   iconoN = new ImageIcon ("src\\ImagenesNew\\Imagenes\\CurryN.png");
                    JbtnCurry.setIcon(iconoN);
                    JbtnCurry.setEnabled(false);
                    break;
                case 3:
-                   iconoN = new ImageIcon ("src\\Imagenes\\SushiN.jpg");
+                   iconoN = new ImageIcon ("src\\ImagenesNew\\Imagenes\\SushiN.png");
                    JbtnSushi.setIcon(iconoN);
                    JbtnSushi.setEnabled(false);
                    break;
                case 4:
-                   iconoN = new ImageIcon ("src\\Imagenes\\SalmonMarinadoN.jpg");
+                   iconoN = new ImageIcon ("src\\ImagenesNew\\Imagenes\\SalmonMarinadoN.png");
                    JbtnSalmon.setIcon(iconoN);
                    JbtnSalmon.setEnabled(false);
                    break;
                case 6:
-                   iconoN = new ImageIcon ("src\\Imagenes\\MochisN.jpg");
+                   iconoN = new ImageIcon ("src\\ImagenesNew\\Imagenes\\MochisN.png");
                    JbtnMochis.setIcon(iconoN);
                    JbtnMochis.setEnabled(false);
                    break;
                case 7:
-                   iconoN = new ImageIcon ("src\\Imagenes\\BubbleWaffleN.png");
+                   iconoN = new ImageIcon ("src\\ImagenesNew\\Imagenes\\BubbleWaffleN.png");
                    JbtnWafle.setIcon(iconoN);
                    JbtnWafle.setEnabled(false);  
                    break;
@@ -133,22 +136,22 @@ public class Ventana extends javax.swing.JFrame {
                ImageIcon iconoN;
            switch (j){
                case 1:
-                   iconoN = new ImageIcon ("src\\Imagenes\\TeVerdeN.png");
+                   iconoN = new ImageIcon ("src\\ImagenesNew\\Imagenes\\TeVerdeN.png");
                    JbtnTé.setIcon(iconoN);
                    JbtnTé.setEnabled(false);
                    break;
                case 2:
-                   iconoN = new ImageIcon ("src\\Imagenes\\SakeN.png");
+                   iconoN = new ImageIcon ("src\\ImagenesNew\\Imagenes\\SakeN.png");
                    JbtnSake.setIcon(iconoN);
                    JbtnSake.setEnabled(false);
                    break;
                case 3:
-                   iconoN = new ImageIcon ("src\\Imagenes\\CalpisN.png");
+                   iconoN = new ImageIcon ("src\\ImagenesNew\\Imagenes\\CalpisN.png");
                    JbtnCalpis.setIcon(iconoN);
                    JbtnCalpis.setEnabled(false);
                    break;
                case 4:
-                   iconoN = new ImageIcon ("src\\Imagenes\\RefrescoN.png");
+                   iconoN = new ImageIcon ("src\\ImagenesNew\\Imagenes\\RefrescoN.png");
                    JbtnRefresco.setIcon(iconoN);
                    JbtnRefresco.setEnabled(false);
                          }
@@ -294,7 +297,7 @@ public class Ventana extends javax.swing.JFrame {
         jPanel1.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(85, 231, 255), 5, true));
 
         JbtnRamen.setBackground(new java.awt.Color(153, 255, 153));
-        JbtnRamen.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/RamenD.jpg"))); // NOI18N
+        JbtnRamen.setIcon(new javax.swing.ImageIcon(getClass().getResource("/ImagenesNew/Imagenes/RamenD.png"))); // NOI18N
         JbtnRamen.setFocusPainted(false);
         JbtnRamen.setFocusable(false);
         JbtnRamen.setRequestFocusEnabled(false);
@@ -304,21 +307,21 @@ public class Ventana extends javax.swing.JFrame {
             }
         });
 
-        JbtnCurry.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/CurryD.png"))); // NOI18N
+        JbtnCurry.setIcon(new javax.swing.ImageIcon(getClass().getResource("/ImagenesNew/Imagenes/CurryD.png"))); // NOI18N
         JbtnCurry.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 JbtnCurryActionPerformed(evt);
             }
         });
 
-        JbtnSushi.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/SushiD.jpg"))); // NOI18N
+        JbtnSushi.setIcon(new javax.swing.ImageIcon(getClass().getResource("/ImagenesNew/Imagenes/SushiD.png"))); // NOI18N
         JbtnSushi.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 JbtnSushiActionPerformed(evt);
             }
         });
 
-        JbtnSalmon.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/SalmonMarinadoD.jpg"))); // NOI18N
+        JbtnSalmon.setIcon(new javax.swing.ImageIcon(getClass().getResource("/ImagenesNew/Imagenes/SalmonMarinadoD.png"))); // NOI18N
         JbtnSalmon.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 JbtnSalmonActionPerformed(evt);
@@ -329,14 +332,14 @@ public class Ventana extends javax.swing.JFrame {
         jLabel4.setForeground(new java.awt.Color(85, 231, 255));
         jLabel4.setText("Platillos:");
 
-        JbtnMochis.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/MochisD.jpg"))); // NOI18N
+        JbtnMochis.setIcon(new javax.swing.ImageIcon(getClass().getResource("/ImagenesNew/Imagenes/MochisD.png"))); // NOI18N
         JbtnMochis.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 JbtnMochisActionPerformed(evt);
             }
         });
 
-        JbtnWafle.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/BubbleWaffleD.png"))); // NOI18N
+        JbtnWafle.setIcon(new javax.swing.ImageIcon(getClass().getResource("/ImagenesNew/Imagenes/BubbleWaffleD.png"))); // NOI18N
         JbtnWafle.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 JbtnWafleActionPerformed(evt);
@@ -352,7 +355,7 @@ public class Ventana extends javax.swing.JFrame {
         jLabel6.setText("Bebidas:");
 
         JbtnRefresco.setBackground(new java.awt.Color(153, 255, 153));
-        JbtnRefresco.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/RefrescoD.png"))); // NOI18N
+        JbtnRefresco.setIcon(new javax.swing.ImageIcon(getClass().getResource("/ImagenesNew/Imagenes/RefrescoD.png"))); // NOI18N
         JbtnRefresco.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 JbtnRefrescoActionPerformed(evt);
@@ -361,7 +364,7 @@ public class Ventana extends javax.swing.JFrame {
 
         JbtnCalpis.setBackground(new java.awt.Color(153, 255, 153));
         JbtnCalpis.setForeground(new java.awt.Color(153, 255, 153));
-        JbtnCalpis.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/CalpisD.png"))); // NOI18N
+        JbtnCalpis.setIcon(new javax.swing.ImageIcon(getClass().getResource("/ImagenesNew/Imagenes/CalpisD.png"))); // NOI18N
         JbtnCalpis.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 JbtnCalpisActionPerformed(evt);
@@ -369,7 +372,7 @@ public class Ventana extends javax.swing.JFrame {
         });
 
         JbtnTé.setBackground(new java.awt.Color(153, 255, 153));
-        JbtnTé.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/TeVerdeD.png"))); // NOI18N
+        JbtnTé.setIcon(new javax.swing.ImageIcon(getClass().getResource("/ImagenesNew/Imagenes/TeVerdeD.png"))); // NOI18N
         JbtnTé.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 JbtnTéActionPerformed(evt);
@@ -377,7 +380,7 @@ public class Ventana extends javax.swing.JFrame {
         });
 
         JbtnSake.setBackground(new java.awt.Color(153, 255, 153));
-        JbtnSake.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/SakeD.png"))); // NOI18N
+        JbtnSake.setIcon(new javax.swing.ImageIcon(getClass().getResource("/ImagenesNew/Imagenes/SakeD.png"))); // NOI18N
         JbtnSake.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 JbtnSakeActionPerformed(evt);
@@ -385,7 +388,7 @@ public class Ventana extends javax.swing.JFrame {
         });
 
         jbtnIngreRamen.setBackground(new java.awt.Color(255, 255, 255));
-        jbtnIngreRamen.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/Ingredientes.png"))); // NOI18N
+        jbtnIngreRamen.setIcon(new javax.swing.ImageIcon(getClass().getResource("/ImagenesNew/Imagenes/Ingredientes.png"))); // NOI18N
         jbtnIngreRamen.setContentAreaFilled(false);
         jbtnIngreRamen.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -394,7 +397,7 @@ public class Ventana extends javax.swing.JFrame {
         });
 
         jbtnIngreCurry.setBackground(new java.awt.Color(255, 255, 255));
-        jbtnIngreCurry.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/Ingredientes.png"))); // NOI18N
+        jbtnIngreCurry.setIcon(new javax.swing.ImageIcon(getClass().getResource("/ImagenesNew/Imagenes/Ingredientes.png"))); // NOI18N
         jbtnIngreCurry.setContentAreaFilled(false);
         jbtnIngreCurry.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -403,7 +406,7 @@ public class Ventana extends javax.swing.JFrame {
         });
 
         jbtnIngreSushi.setBackground(new java.awt.Color(255, 255, 255));
-        jbtnIngreSushi.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/Ingredientes.png"))); // NOI18N
+        jbtnIngreSushi.setIcon(new javax.swing.ImageIcon(getClass().getResource("/ImagenesNew/Imagenes/Ingredientes.png"))); // NOI18N
         jbtnIngreSushi.setContentAreaFilled(false);
         jbtnIngreSushi.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -412,7 +415,7 @@ public class Ventana extends javax.swing.JFrame {
         });
 
         jbtnIngreSalmon.setBackground(new java.awt.Color(255, 255, 255));
-        jbtnIngreSalmon.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/Ingredientes.png"))); // NOI18N
+        jbtnIngreSalmon.setIcon(new javax.swing.ImageIcon(getClass().getResource("/ImagenesNew/Imagenes/Ingredientes.png"))); // NOI18N
         jbtnIngreSalmon.setContentAreaFilled(false);
         jbtnIngreSalmon.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -421,7 +424,7 @@ public class Ventana extends javax.swing.JFrame {
         });
 
         jbtnIngreWaffle.setBackground(new java.awt.Color(255, 255, 255));
-        jbtnIngreWaffle.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/Ingredientes.png"))); // NOI18N
+        jbtnIngreWaffle.setIcon(new javax.swing.ImageIcon(getClass().getResource("/ImagenesNew/Imagenes/Ingredientes.png"))); // NOI18N
         jbtnIngreWaffle.setContentAreaFilled(false);
         jbtnIngreWaffle.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -430,7 +433,7 @@ public class Ventana extends javax.swing.JFrame {
         });
 
         jbtnIngreMochis.setBackground(new java.awt.Color(255, 255, 255));
-        jbtnIngreMochis.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/Ingredientes.png"))); // NOI18N
+        jbtnIngreMochis.setIcon(new javax.swing.ImageIcon(getClass().getResource("/ImagenesNew/Imagenes/Ingredientes.png"))); // NOI18N
         jbtnIngreMochis.setContentAreaFilled(false);
         jbtnIngreMochis.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1013,29 +1016,90 @@ return 1;
             
     private void mostrarVentanaDeConfirmacion(double Final) throws SQLException {
     idComanda++;
-    
+    idRecibo++;
+     LocalDateTime fechaHoraActual = LocalDateTime.now();
     Connection conn = ConexionBD.getConnection();
-    
-    
-    
-    
-            String query = "INSERT INTO recibo (idComanda, folioReserva, fecha, hora, totalSinIVA, totalConIVA) VALUES (?, "
-                    + "(SELECT FolioReserva from reservacion r join mesa m on m.idMesa = r.idMesa WHERE r.fecha = current_date() and timediff(current_time, r.hora) < '00:20:00' and m.Estado = 2 and m.idMesa = ?),"
-                    + " CURRENT_DATE, CURRENT_TIME, ?, ?)";
+    String queryObtenerFolio = "SELECT FolioReserva FROM reservacion r JOIN mesa m ON m.idMesa = r.idMesa WHERE r.fecha = CURRENT_DATE() AND TIMEDIFF(CURRENT_TIME(), r.hora) < '00:20:00' AND m.Estado = 2 AND m.idMesa = ?";
+int folioReserva = -1; // Valor predeterminado si no se encuentra ningún resultado
 
-            try (PreparedStatement pstmt = conn.prepareStatement(query)) {
-                pstmt.setInt(1, idComanda);
-                pstmt.setInt(2,idMesa);
-                pstmt.setDouble(3, total);
-                pstmt.setDouble(4, Final);
+try (PreparedStatement pstmtFolio = conn.prepareStatement(queryObtenerFolio)) {
+    pstmtFolio.setInt(1, idMesa);
+    ResultSet rsFolio = pstmtFolio.executeQuery();
 
-                pstmt.executeUpdate();
-    System.out.println("?,"
-                    + "(SELECT FolioReserva from reservacion r join mesa m on m.idMesa = r.idMesa WHERE r.fecha = current_date() and timediff(current_time, r.hora) < '00:20:00' and m.Estado = 2 and m.idMesa = ?),"
-                    + " CURRENT_DATE, CURRENT_TIME, ?, ?)");
-                // La inserción se ha realizado con éxito
-                 
+    if (rsFolio.next()) {
+        folioReserva = rsFolio.getInt("FolioReserva");
+    }
+} catch (SQLException ex) {
+    ex.printStackTrace();
+}
+
+String queryInsercion = "INSERT INTO recibo (idComanda, folioReserva, fecha, hora, totalSinIVA, totalConIVA) VALUES (?, ?, CURRENT_DATE, CURRENT_TIME, ?, ?)";
+
+try (PreparedStatement pstmtInsercion = conn.prepareStatement(queryInsercion)) {
+    pstmtInsercion.setInt(1, idComanda);
+    pstmtInsercion.setInt(2, folioReserva);
+    pstmtInsercion.setDouble(3, total);
+    pstmtInsercion.setDouble(4, Final);
+    pstmtInsercion.executeUpdate();
+} catch (SQLException ex) {
+    ex.printStackTrace();
+}      
+    /////////////////////////////////////////////////////////////////
+        int dia = fechaHoraActual.getDayOfMonth();
+        int mes = fechaHoraActual.getMonthValue();
+        int anio = fechaHoraActual.getYear();
+        
+        int hora = fechaHoraActual.getHour();
+        int minuto = fechaHoraActual.getMinute();
+        int segundo = fechaHoraActual.getSecond();
+     String filename = "Recibo" + idMesa + ".pdf";
+        try (PDDocument document = new PDDocument()) {
+            PDPage page = new PDPage();
+            document.addPage(page);
+
+            try (PDPageContentStream contentStream = new PDPageContentStream(document, page)) {
+                contentStream.beginText();
+                contentStream.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA), 14);
+                contentStream.setLeading(14.5f);
+                contentStream.newLineAtOffset(25, 700);
+
+                contentStream.showText("Detalles del Recibo:" + idRecibo);
+                contentStream.newLine();
+                contentStream.showText("idComanda: " + idComanda); // Asumiendo que el ID del cliente es el folio
+                contentStream.newLine();
+                contentStream.showText("Folio de Reservacion:"+ folioReserva);
+                contentStream.newLine();
+                contentStream.showText("Fecha:" + dia + "/" + mes + "/" + anio);
+                contentStream.newLine();
+                contentStream.showText("Hora:"+ hora + ":" + minuto + ":" + segundo);
+                contentStream.newLine();
+                contentStream.showText("Total sin IVA " + total);
+                contentStream.newLine();
+                contentStream.showText("Total con IVA: " + Final);
+                contentStream.newLine();
+                contentStream.endText();
             }
+
+            document.save(filename);
+
+            // Abrir el PDF generado
+            if (Desktop.isDesktopSupported()) {
+                try {
+                    File pdfFile = new File(filename);
+                    Desktop.getDesktop().open(pdfFile);
+                } catch (IOException e) {
+                    JOptionPane.showMessageDialog(null, "Error al abrir el archivo PDF.", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            } else {
+                JOptionPane.showMessageDialog(null, "No se puede abrir el archivo PDF en este sistema.", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "Error al generar el archivo PDF.", "Error", JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
+        }
+    
+               // La inserción se ha realizado con éxit             
+            
     
          String quers = "INSERT INTO comanda (fecha, hora, FolioReserva) VALUES (CURRENT_DATE, CURRENT_TIME,"
                  + "(SELECT FolioReserva from reservacion r join mesa m on m.idMesa = r.idMesa WHERE r.fecha = current_date() and timediff(current_time, r.hora) < '00:20:00' and m.Estado = 2 and m.idMesa = ?))";
@@ -1048,6 +1112,7 @@ return 1;
        enviarComanda(juntarLista());
        limpiarLista();
        inicializarObjetos();
+
     }
     
     public ArrayList<String[]> juntarLista() {
@@ -1101,7 +1166,7 @@ return 1;
                 System.out.println("Platillo" + nombre);
                 query = "call insertarplatillosporcomanda (?,(SELECT idPlatillo FROM platillo WHERE nombre = ?),?)";
                 idCmaActual = idCmaPlatillo;
-            }
+                 }
 
             PreparedStatement ps = conn.prepareStatement(query);
             ps.setInt(1, idCmaActual);
