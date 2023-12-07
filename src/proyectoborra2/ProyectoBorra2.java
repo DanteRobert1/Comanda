@@ -14,7 +14,8 @@ public class ProyectoBorra2 {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-         new Ventana().setVisible(true);
-         
+         new Ventana(1,1).setVisible(true);
+        // new Ventana(1,2).setVisible(true);
+        // new Ventana(1,3).setVisible(true);
     }
 }
