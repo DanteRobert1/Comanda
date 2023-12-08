@@ -8,21 +8,14 @@ import Conexion.ConexionBD;
 import static Conexion.ConexionBD.getConnection;
 import java.awt.BorderLayout;
 import java.awt.Desktop;
-import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,17 +23,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
-import javax.swing.JButton;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
-import javax.swing.JTextField;
-import javax.swing.ListModel;
-import javax.swing.SwingUtilities;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
@@ -48,47 +34,60 @@ import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
 
 /**
- *
+ *Proyecto Comanda
  * @author Daniel
  */
 public class Ventana extends javax.swing.JFrame {
-    private JList<String> platillo;
-    ConexionBD conexion;    
-    private DefaultListModel<String> modeloLista;
-    private Map<String, Integer> nombrePlatilloID;
-    private Map<Integer, String> idNombrePlatillo; 
-    private Map<String, Double> preciosPorPlatillo;
-    private int id;
-    private static int idComanda;
-    private static int folioReserva;
-    private static int idCliente;
-    private static int idRecibo;
-    private int idBebidas;
+
+    ConexionBD conexion; // Objeto para manejar la conexión a la base de datos   
+    private DefaultListModel<String> modeloLista;  // Modelo para almacenar una lista de Strings
+    private int id; // Identificador genérico para el id de comida
+    private static int idComanda; // Identificador de la comanda actual
+    private static int idRecibo; // Identificador del recibo asociado a la comanda 
+    private int idBebidas; // Identificador específico para las bebidas
     private double total = 0.0; // Variable para almacenar el total acumulado
-    private double totalIva = 0.0;
-    private static int idMesa;
-    private static int idSucursal;
+    private static int idMesa; // Identificador de la mesa 
+    private static int idSucursal; // Identificador de la sucursal 
 
     
     /**
      * Creates new form Ventana
+     * Esta ventana lo que hace es que simular la interfaz grafica que se llevara acabo para las comandas
      */
     public Ventana(int idSucursal, int idMesa) {
+        // Asignar valores a las variables idSucursal e idMesa
         this.idSucursal=idSucursal;
         this.idMesa = idMesa;
+        // Inicializar componentes de la interfaz gráfica
         initComponents();
         inicializarObjetos();
+        // Crear un modelo de lista por defecto y asignarlo al componente Pedido (JList)
         modeloLista = new DefaultListModel<>();
         Pedido.setModel(modeloLista);
+        // Inicializar la conexión a la base de datos
         conexion = new ConexionBD(); 
         
     }
-    
+    /**
+     * Antes que nada la idea de este proyecto es simular en tomar la comanda de un cliente, como sabemos tiene que tener varios platillos.
+     * 
+     * Bebibas para que pueda funcionar, aparte de postres, claro algunos ingredientes se acabaran antes de poder tomar la orden
+     * es por eso que en este codigo muestra un menu con los nombre de cada platillo y bebida, muestra el orden y el conteo que se esta generando
+     * Aparte de que si quiere saber los ingredientes puede verlos, aparte de que en caso de que se equivoque el cliente, puede eliminar platillos que no querian
+     * 
+     * Abra una lista que llevara para saber los platillos y abajo un conteo total de lo que van a pagar, sobra decir que los precios se veran en cada momento.
+     * 
+     * Al momento de enviar, se le preguntara si quiere continuar, si le da en si, podra pedir la orden, aparte de dar con la orden, se imprimira su ticket de orden.
+     * 
+     * Se enviara una comanda, el recibo y tambien el platilloporcomanda y bebida, para que asi sepan que es lo que quieren, cuanto cuesta y cual es la cantidad que necesitan.
+     */
      private void inicializarObjetos() {
+         // Lo que ponemos es un ciclo con 7 variables que seran los platillos para anailazarlos todos
                      try {
                          for (int i = 1; i <= 7; i++) {
-           boolean existencia = verificarDisponibilidadTotalPlatillo(i);
-           if (!existencia){
+           boolean existencia = verificarDisponibilidadTotalPlatillo(i); // manda a llamar un proceso para verificar la existencia de los ingredientes de los platillos
+           if (!existencia){  
+            // Si no hay ingredientes se bloquean los botones y se cambia la imagen
                ImageIcon iconoN;
            switch (i){
                case 1:
@@ -129,11 +128,13 @@ public class Ventana extends javax.swing.JFrame {
         } catch (SQLException ex) {
             System.out.println(ex);
         }
+                     // Esto funciona igual pero ahora serian las bebidas
         try{
                          for (int j = 1; j <= 4; j++) {
-           boolean existenciaB = verificarDisponibilidadTotalBebidas(j);
+           boolean existenciaB = verificarDisponibilidadTotalBebidas(j); // Lo mismo, solo que en vez de ingredientes, vera si no hay bebidas disponibles 
            if (!existenciaB){
                ImageIcon iconoN;
+               // Si no hay se bloquea las imagenes y cambie las imagenes 
            switch (j){
                case 1:
                    iconoN = new ImageIcon ("src\\ImagenesNew\\Imagenes\\TeVerdeN.png");
@@ -662,14 +663,20 @@ public class Ventana extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-
+/**
+ * Este boton lo que hace es enviar a la lista el platillo calpis, aparte de ponerle su prosepero ID, aparte de agarrar el precio para que vaya contando
+ * @param evt 
+ */
     private void JbtnCalpisActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JbtnCalpisActionPerformed
         idBebidas = 3; 
         agregarALista("Calpis");
         AgarrarPreciosBebidas();
       JlblTotal.setText("$"+ total);
     }//GEN-LAST:event_JbtnCalpisActionPerformed
-
+/**
+ *  Este boton lo que hace es enviar a la lista el platillo Ramen, aparte de ponerle su prosepero ID, aparte de agarrar el precio para que vaya contando
+ * @param evt 
+ */
     private void JbtnRamenActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JbtnRamenActionPerformed
 
       id = 1;
@@ -677,67 +684,97 @@ public class Ventana extends javax.swing.JFrame {
       AgarrarPrecios();
       JlblTotal.setText("$"+ total);
     }//GEN-LAST:event_JbtnRamenActionPerformed
-
+/**
+ *  Este boton lo que hace es enviar a la lista la Bebida Refresco, aparte de ponerle su prosepero ID, aparte de agarrar el precio para que vaya contando
+ * @param evt 
+ */
     private void JbtnRefrescoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JbtnRefrescoActionPerformed
        idBebidas = 4;
         agregarALista("Refresco");
        AgarrarPreciosBebidas();
       JlblTotal.setText("$"+ total);
     }//GEN-LAST:event_JbtnRefrescoActionPerformed
-
+/**
+ *  Este boton lo que hace es enviar a la lista el platillo Curry, aparte de ponerle su prosepero ID, aparte de agarrar el precio para que vaya contando
+ * @param evt 
+ */
     private void JbtnCurryActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JbtnCurryActionPerformed
        id = 2;
         agregarALista("Curry Japones");
        AgarrarPrecios();
       JlblTotal.setText("$"+ total);
     }//GEN-LAST:event_JbtnCurryActionPerformed
-
+/**
+ *  Este boton lo que hace es enviar a la lista el platillo Sushi, aparte de ponerle su prosepero ID, aparte de agarrar el precio para que vaya contando
+ * @param evt 
+ */
     private void JbtnSushiActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JbtnSushiActionPerformed
         id= 3; 
         agregarALista("Sushi de carne y bacon");
          AgarrarPrecios();
       JlblTotal.setText("$"+ total);
     }//GEN-LAST:event_JbtnSushiActionPerformed
-
+/**
+ *  Este boton lo que hace es enviar a la lista el platillo Salmon, aparte de ponerle su prosepero ID, aparte de agarrar el precio para que vaya contando
+ * @param evt 
+ */
     private void JbtnSalmonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JbtnSalmonActionPerformed
         id = 4;
         agregarALista("Salmon marinado japonés");
         AgarrarPrecios();
       JlblTotal.setText("$"+ total);
     }//GEN-LAST:event_JbtnSalmonActionPerformed
-
+/**
+ *  Este boton lo que hace es enviar a la lista la bebida mochis de coco, aparte de ponerle su prosepero ID, aparte de agarrar el precio para que vaya contando
+ * @param evt 
+ */
     private void JbtnMochisActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JbtnMochisActionPerformed
         id = 6;
         agregarALista("Mochis de coco");
         AgarrarPrecios();
       JlblTotal.setText("$"+ total);
     }//GEN-LAST:event_JbtnMochisActionPerformed
-
+/**
+ *  Este boton lo que hace es enviar a la lista el platillo Waffle, aparte de ponerle su prosepero ID, aparte de agarrar el precio para que vaya contando
+ * @param evt 
+ */
     private void JbtnWafleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JbtnWafleActionPerformed
         id = 7;
         agregarALista("Bubble Waffle");
         AgarrarPrecios();
       JlblTotal.setText("$"+ total);
     }//GEN-LAST:event_JbtnWafleActionPerformed
-
+/**
+ *  Este boton lo que hace es enviar a la lista la bebida te verde, aparte de ponerle su prosepero ID, aparte de agarrar el precio para que vaya contando
+ * @param evt 
+ */
     private void JbtnTéActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JbtnTéActionPerformed
         idBebidas = 1;
         agregarALista("Te Verde");
         AgarrarPreciosBebidas();
       JlblTotal.setText("$"+ total);
     }//GEN-LAST:event_JbtnTéActionPerformed
-
+/**
+ *  Este boton lo que hace es enviar a la lista la bebida Sake, aparte de ponerle su prosepero ID, aparte de agarrar el precio para que vaya contando
+ * @param evt 
+ */
     private void JbtnSakeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JbtnSakeActionPerformed
         idBebidas = 2;
         agregarALista("Sake");
         AgarrarPreciosBebidas();
       JlblTotal.setText("$"+ total);
     }//GEN-LAST:event_JbtnSakeActionPerformed
-
+/**
+ * Este boton manda a llamar la funcion eliminar elementos para que pueda eliminar los platillos o bebidas agregados a la lista
+ * @param evt 
+ */
     private void JbtnEliminarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JbtnEliminarActionPerformed
          eliminarElementoSeleccionado();
     }//GEN-LAST:event_JbtnEliminarActionPerformed
-
+/**
+ * Lo que hace este boton es enviar una confirmacion si realmente quiere enviar esa horden 
+ * @param evt 
+ */
     private void JbtnEnviarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JbtnEnviarActionPerformed
         try {
             ConfirmacionTasSeguro();
@@ -745,7 +782,10 @@ public class Ventana extends javax.swing.JFrame {
             Logger.getLogger(Ventana.class.getName()).log(Level.SEVERE, null, ex);
         }
     }//GEN-LAST:event_JbtnEnviarActionPerformed
-
+/**
+ * Este boton mostrara los ingredientes del ramen, aparte de mandar su id
+ * @param evt 
+ */
     private void jbtnIngreRamenActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbtnIngreRamenActionPerformed
         try {
             id = 1;
@@ -754,7 +794,10 @@ public class Ventana extends javax.swing.JFrame {
             Logger.getLogger(Ventana.class.getName()).log(Level.SEVERE, null, ex);
         }
     }//GEN-LAST:event_jbtnIngreRamenActionPerformed
-
+/**
+ * Este boton mostrara los ingredientes del Curry, aparte de mandar su id
+ * @param evt 
+ */
     private void jbtnIngreCurryActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbtnIngreCurryActionPerformed
         try {
             id = 2;
@@ -763,7 +806,10 @@ public class Ventana extends javax.swing.JFrame {
             Logger.getLogger(Ventana.class.getName()).log(Level.SEVERE, null, ex);
         }
     }//GEN-LAST:event_jbtnIngreCurryActionPerformed
-
+/**
+ * Este boton mostrara los ingredientes del sushi, aparte de mandar su id
+ * @param evt 
+ */
     private void jbtnIngreSushiActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbtnIngreSushiActionPerformed
         try {
             id = 3;
@@ -772,7 +818,10 @@ public class Ventana extends javax.swing.JFrame {
             Logger.getLogger(Ventana.class.getName()).log(Level.SEVERE, null, ex);
         }
     }//GEN-LAST:event_jbtnIngreSushiActionPerformed
-
+/**
+ * Este boton mostrara los ingredientes del Salmon, aparte de mandar su id
+ * @param evt 
+ */
     private void jbtnIngreSalmonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbtnIngreSalmonActionPerformed
         try {
             id = 4;
@@ -781,7 +830,10 @@ public class Ventana extends javax.swing.JFrame {
             Logger.getLogger(Ventana.class.getName()).log(Level.SEVERE, null, ex);
         }
     }//GEN-LAST:event_jbtnIngreSalmonActionPerformed
-
+/**
+ * Este boton mostrara los ingredientes del Waffle, aparte de mandar su id
+ * @param evt 
+ */
     private void jbtnIngreWaffleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbtnIngreWaffleActionPerformed
         try {
             id = 7;
@@ -790,7 +842,10 @@ public class Ventana extends javax.swing.JFrame {
             Logger.getLogger(Ventana.class.getName()).log(Level.SEVERE, null, ex);
         }
     }//GEN-LAST:event_jbtnIngreWaffleActionPerformed
-
+/**
+ * Este boton mostrara los ingredientes del Mochis, aparte de mandar su id
+ * @param evt 
+ */
     private void jbtnIngreMochisActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbtnIngreMochisActionPerformed
         try {
             id = 6;
@@ -800,28 +855,42 @@ public class Ventana extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_jbtnIngreMochisActionPerformed
 
-        // Método para obtener la cantidad disponible de un ingrediente en el almacén
+        /**
+         * Método para obtener la cantidad disponible de un ingrediente en el almacén
+         * @param idIngrediente para identificar el ingrediente
+         * @return
+         * @throws SQLException 
+         */
     public static double obtenerCantidadDisponible(int idIngrediente) throws SQLException {
+        // Declara e inicializa la variable cantidadDisponible como un valor double, inicialmente en 0, para almacenar la cantidad del ingrediente disponible.
         double cantidadDisponible = 0;
+        // Define la consulta SQL que busca obtener la cantidad de un ingrediente específico basado en su identificador (idIngrediente) en la tabla ingredientesalmacen.
         String query = "SELECT cantidad FROM ingredientesalmacen WHERE idIngrediente = ?";
         
         try (Connection conn = getConnection();
-             PreparedStatement ps = conn.prepareStatement(query)) {
-
+             PreparedStatement ps = conn.prepareStatement(query)) { //Ejecutar consulta
+        // Asigna el valor del identificador del ingrediente a la consulta parametrizada.
             ps.setInt(1, idIngrediente);
+             // Ejecuta la consulta SQL y recupera el resultado en un objeto ResultSet.
             ResultSet rs = ps.executeQuery();
-
+             // Comprueba si hay algún resultado en el ResultSet y, en caso afirmativo, asigna la cantidad recuperada del ingrediente a la variable cantidadDisponible.
             if (rs.next()) {
                 cantidadDisponible = rs.getDouble("cantidad");
             }
         } catch (SQLException e) {
+                // Maneja las excepciones de tipo SQLException en caso de error durante la ejecución de la consulta SQL, proporcionando un mensaje de error detallado.
             throw new SQLException("Error al obtener la cantidad disponible del ingrediente", e);
         }
-
+          // Devuelve la cantidad disponible del ingrediente almacenada en la variable cantidadDisponible.
         return cantidadDisponible;
     }
 
-    // Método para obtener los ingredientes requeridos para un platillo
+    /**
+     * Método para obtener los ingredientes requeridos para un platillo
+     * @param idPlatillo para identificar el platillo
+     * @return
+     * @throws SQLException 
+     */
     public static Map<Integer, Double> obtenerIngredientesRequeridos(int idPlatillo) throws SQLException {
         Map<Integer, Double> ingredientesRequeridos = new HashMap<>();
 
@@ -829,26 +898,36 @@ public class Ventana extends javax.swing.JFrame {
         String query = "SELECT idIngrediente, cantidad FROM ingredientesporplatillo WHERE idPlatillo = ?";
         
         try (Connection conn = getConnection();
-             PreparedStatement ps = conn.prepareStatement(query)) {
-
+             PreparedStatement ps = conn.prepareStatement(query)) { //Ejecutar consulta
+    // Prepara la consulta SQL para obtener los ingredientes necesarios para un platillo.
             ps.setInt(1, idPlatillo);
+                // Ejecuta la consulta SQL y recupera los resultados en un objeto ResultSet.
             ResultSet rs = ps.executeQuery();
-
+                // Itera a través de los resultados obtenidos en el ResultSet.
             while (rs.next()) {
+                        // Obtiene el identificador del ingrediente y la cantidad requerida para el platillo.
                 int idIngrediente = rs.getInt("idIngrediente");
                 double cantidadRequerida = rs.getDouble("cantidad");
+                        // Almacena los ingredientes requeridos y sus cantidades en un mapa (ingredientesRequeridos).
                 ingredientesRequeridos.put(idIngrediente, cantidadRequerida);
             }
         } catch (SQLException e) {
+                // Maneja las excepciones de tipo SQLException en caso de error durante la ejecución de la consulta SQL.
             throw new SQLException("Error al obtener los ingredientes requeridos para el platillo", e);
         }
-
+// Retorna los ingredientes requeridos para el platillo.
         return ingredientesRequeridos;
     }
 
-    // Método para verificar la disponibilidad total de ingredientes para un platillo específico
+    /**
+     * Método para verificar la disponibilidad total de ingredientes para un platillo específico
+     * @param idPlatillo para identificar el platillo
+     * @return  
+     * @throws SQLException 
+     */
     public static boolean verificarDisponibilidadTotalPlatillo(int idPlatillo) throws SQLException {
         boolean existencia = true;
+            // Obtiene los ingredientes requeridos y sus cantidades para el platillo específico
         Map<Integer, Double> ingredientesRequeridos = obtenerIngredientesRequeridos(idPlatillo);
         // Verificar la disponibilidad total de cada ingrediente requerido para el platillo
         for (Map.Entry<Integer, Double> entry : ingredientesRequeridos.entrySet()) {
@@ -856,48 +935,67 @@ public class Ventana extends javax.swing.JFrame {
             double cantidadRequerida = entry.getValue();
             double cantidadDisponible = obtenerCantidadDisponible(idIngrediente);
             
-            //System.out.println("id:"+idIngrediente+ "Cantidad " + cantidadRequerida + " CantidadDispo"+cantidadDisponible );
+            // Se compara la cantida disponible en el almacen con la cantidad requerida del platillo
             if (cantidadDisponible < cantidadRequerida) {
                 // System.out.println("No hay suficientes ingredientes para el platillo con ID " + idPlatillo);
+                // Si no hay platillos regresara un falso que significara que no hay
                 existencia = false;
                 break;
            } else {
                 //System.out.println("Hay suficientes ingredientes para el platillo con ID " + idPlatillo);
             }
         }
+        // Retorna la existencia del platillo para confirmar que si hay ingredientes
        return existencia;
     }
-    
+    /**
+     * Obtiene la cantidad disponible que hay en el almacen para las bebidas
+     * @param idBebida para identificar la bebida
+     * @return
+     * @throws SQLException 
+     */
     public static double obtenerCantidadDisponibleBebida(int idBebida) throws SQLException {
-        double cantidadDisponible = 0;
+        double cantidadDisponible = 0; // Variable para almacenar la cantidad disponible de la bebida
+            // Consulta SQL para obtener la cantidad disponible de la bebida en el almacén
         String query = "SELECT cantidad FROM bebidasalmacen WHERE idBebida = ?";
         
-        try (Connection conn = getConnection();
-             PreparedStatement ps = conn.prepareStatement(query)) {
-
+        try (Connection conn = getConnection(); // Establece la conexión a la base de datos
+             PreparedStatement ps = conn.prepareStatement(query)) { // Prepara la declaración SQL
+      // Establece el parámetro del ID de la bebida en la consulta SQL
             ps.setInt(1, idBebida);
+            // Ejecuta la consulta SQL y obtiene el resultado
             ResultSet rs = ps.executeQuery();
-
+            
+            // Verifica si se encontró algún resultado
             if (rs.next()) {
+                // Obtiene la cantidad disponible de la bebida
                 cantidadDisponible = rs.getDouble("cantidad");
             }
         } catch (SQLException e) {
+                    // En caso de error, lanza una excepción con un mensaje descriptivo donde hay 
             throw new SQLException("Error al obtener la cantidad disponible de la bebida", e);
         }
 
-        return cantidadDisponible;
+        return cantidadDisponible; // Retorna la cantidad disponible de la bebida en el almacén
     }
-    
+    /**
+     * Verifica la disponibilidad de la bebida, para saber si hay o no
+     * @param idBebida para identificar la bebida
+     * @return
+     * @throws SQLException 
+     */
     public static boolean verificarDisponibilidadTotalBebidas(int idBebida) throws SQLException {
-    boolean existenciaB = true;
+    boolean existenciaB = true; 
+        // Obtiene los ingredientes requeridos y sus cantidades para el platillo específico
     double cantidadDisponible = obtenerCantidadDisponibleBebida(idBebida);
     if (cantidadDisponible <=0 ) {
+        // En caso de que no encuentre ingredientes devuelve un falso de que no hay
                  // System.out.println("No hay suficientes bebidas para el platillo con ID " + idBebida);
                 existenciaB = false;
            } else {
                 // System.out.println("Hay suficientes bebidas para el platillo con ID " + idBebida);
             }
-        
+        // retorna un true que significa que si hay disponibilidad de bebidas
        return existenciaB;
     }
     
@@ -906,13 +1004,17 @@ public class Ventana extends javax.swing.JFrame {
     
     
     
-    
+    /**
+     * Funcion que permite agarrar los ingredientes del platillo mediante su id
+     * @throws SQLException 
+     */
       private void AgarrarIngrediente() throws SQLException {
-        int idPlatillo = id; // Obtienes el ID del platillo desde algún lugar
-        JFrame ventanaIngredientes = new JFrame("Ingredientes");
+        int idPlatillo = id; // Obtienes el ID del platillo 
+        JFrame ventanaIngredientes = new JFrame("Ingredientes"); // Se abre una ventana
         ventanaIngredientes.setLayout(new BorderLayout());
         // Llamas al método de tu clase ConexionBD para obtener los ingredientes del platillo
         ArrayList<String> ingredientes = conexion.obtenerIngredientesPorID(idPlatillo);
+        // Haces una ventana para poder imprimir los ingredientes
        JTextArea areaIngredientes = new JTextArea();
         for (String ingrediente : ingredientes) {
             areaIngredientes.append(ingrediente +"\n");
@@ -922,43 +1024,45 @@ public class Ventana extends javax.swing.JFrame {
         ventanaIngredientes.setSize(300, 200);
         ventanaIngredientes.setLocationRelativeTo(this);
         ventanaIngredientes.setVisible(true);
-        id = 0;
+        id = 0; // Se iguala a 0 para poder reutilizarlo para cualquier id
        // JOptionPane.showMessageDialog(this, areaIngredientes, "Ingredientes del Platillo", JOptionPane.INFORMATION_MESSAGE);
  }
+      /**
+       * Cada vez que se agarre los platillos se pueda agarrar los precios y ponerlos
+       */
       private void AgarrarPrecios(){
-       int idPlatillo = id;
-       int precioPlato = conexion.obtenerPrecioPlatoDesdeBD(idPlatillo);
-                total += precioPlato;
-                id = 0;
+       int idPlatillo = id; // Se está asignando el valor de id a la variable del platillo para identificarlo para enviarlo a la conexion
+       int precioPlato = conexion.obtenerPrecioPlatoDesdeBD(idPlatillo); // Se envia el idPlatillo, se utilizara para sacar el precio, el resultado sera asignado a precioplato
+                total += precioPlato; // Se suma el precio que se lleva acomulado al que se agarro
+                id = 0; // Se establece el valor de id en cero
       }
-      
+      /**
+       * Cada vez que se envie las bebidas se pueda agarrar los precios y ponerlos
+       */
       private void AgarrarPreciosBebidas(){
-       int idbebi = idBebidas;
-       int precioBebida = conexion.obtenerPrecioBebidaDesdeBD(idbebi);
-                total += precioBebida;
-                idBebidas = 0;
+       int idbebi = idBebidas; // Se está asignando el valor de id a la variable de la bebida para identificarlo para enviarlo a la conexion
+       int precioBebida = conexion.obtenerPrecioBebidaDesdeBD(idbebi); // Se envia el idBebida, se utilizara para sacar el precio, el resultado sera asignado a precioplato
+                total += precioBebida; // Se suma el precio que se lleva acomulado al que se agarro
+                idBebidas = 0; // Se establece el valor de id en cero de bebidas
       }
-      
-      /*
- private int obtenerIDPlatilloDesdeAlgunaParte() {
-       
-return 1;
-    }
-      */
-      
-     
-
-
+      /**
+       * Se agrega al Jlist el platillo o bebida que se selecciono
+       * @param elemento 
+       */
     public void agregarALista(String elemento) {
-        modeloLista.addElement(elemento);
+        modeloLista.addElement(elemento); // Se agrega el elemento que se selecciono (El elemento son los string de cada boton (Ramen,Bebida etc))
     }
     
+    /**
+     * Se elemina lo seleccionado sea Bebida o Platillo
+     */
     private void eliminarElementoSeleccionado() { 
-    int indiceSeleccionado = Pedido.getSelectedIndex();
-    if (indiceSeleccionado != -1) {
-    String elementoSeleccionado = (String) modeloLista.getElementAt(indiceSeleccionado);
-     double  precioARestar = obtenerPrecioDelPlatillo(elementoSeleccionado);
-         total -= precioARestar;
+    int indiceSeleccionado = Pedido.getSelectedIndex(); // Agarra el elemento seleccionado en el Jlist
+    if (indiceSeleccionado != -1) { 
+    String elementoSeleccionado = (String) modeloLista.getElementAt(indiceSeleccionado); // Agarra el elemento y lo guarda en un string 
+    // Se agarra la funcion para poder compararlo con otro string para saber que se eliminara enviando el elemento que se seleccionó
+     double  precioARestar = obtenerPrecioDelElemento(elementoSeleccionado);
+         total -= precioARestar; // Se resta el precio del elemento seleccionado junto con lo que se lleva acomulado
 
         // Eliminar el platillo y su precio de los modelos
         modeloLista.remove(indiceSeleccionado);
@@ -968,34 +1072,42 @@ return 1;
     }
     
 }
-    
-    private double obtenerPrecioDelPlatillo(String platillo) {
+    /**
+     * Se Compara el elemento obtenido para saber el precio a restar
+     * @param Elemento para saber el elemento a comparar
+     * @return 
+     */
+    private double obtenerPrecioDelElemento(String Elemento) {
     // Aquí simulas obtener el precio del platillo
     // Reemplaza esta lógica con tu manera real de obtener el precio del platillo
-    if (platillo.equals("Ramen")) {
+    if (Elemento.equals("Ramen")) {
         return 370.0;
-    } else if (platillo.equals("Curry Japonés")) {
+    } else if (Elemento.equals("Curry Japonés")) {
         return 230.0;
-    }else if (platillo.equals("Sushi de carne y bacon")) {
+    }else if (Elemento.equals("Sushi de carne y bacon")) {
         return 200.0;
-    }else if (platillo.equals("Salmon marinado japonés")) {
+    }else if (Elemento.equals("Salmon marinado japonés")) {
         return 400.0;
-    }else if (platillo.equals("Mochis de coco")) {
+    }else if (Elemento.equals("Mochis de coco")) {
         return 180.0;
-    }else if (platillo.equals("Bubble Waffle")) {
+    }else if (Elemento.equals("Bubble Waffle")) {
         return 80.0;
-    }else if (platillo.equals("Refresco")) {
+    }else if (Elemento.equals("Refresco")) {
         return 20.0;
-    }else if (platillo.equals("Te Verde")) {
+    }else if (Elemento.equals("Te Verde")) {
         return 60.0;
-    }else if (platillo.equals("Sake")) {
+    }else if (Elemento.equals("Sake")) {
         return 120.0;
-    }else if (platillo.equals("Calpis")) {
+    }else if (Elemento.equals("Calpis")) {
         return 70.0;
     }
     return 0.0;
     }
     
+    /**
+     * Una ventana que se mostrara cuando quiera enviar la comanda, preguntando si esta seguro de su decicion
+     * @throws SQLException 
+     */
     private void ConfirmacionTasSeguro() throws SQLException{
         double Iva;
         double Final;
@@ -1013,59 +1125,81 @@ return 1;
             JOptionPane.showMessageDialog(this, "Operación cancelada.", "Cancelado", JOptionPane.INFORMATION_MESSAGE);
         }
     }
-            
+    /**
+     * Se muestra una ventana donde dice que ya esta el pedido hecho, pero lo mas importante es que se envia a la base de datos una comanda,el recibo a imprimir y enviar las bebida y platillos por comanda
+     * @param Final para utilizar el final a pagar
+     * @throws SQLException 
+     */
     private void mostrarVentanaDeConfirmacion(double Final) throws SQLException {
-    idComanda++;
-    idRecibo++;
-     LocalDateTime fechaHoraActual = LocalDateTime.now();
-    Connection conn = ConexionBD.getConnection();
+    idComanda++; // se va aumentando la comanda
+    idRecibo++; // Se va aumentando la comanda
+     LocalDateTime fechaHoraActual = LocalDateTime.now(); // Poder saber la hora y la fecha actaul
+    Connection conn = ConexionBD.getConnection(); // Conectar a la Base de datos
+    // Obtener el FolioReserva
     String queryObtenerFolio = "SELECT FolioReserva FROM reservacion r JOIN mesa m ON m.idMesa = r.idMesa WHERE r.fecha = CURRENT_DATE() AND TIMEDIFF(CURRENT_TIME(), r.hora) < '00:20:00' AND m.Estado = 2 AND m.idMesa = ?";
-int folioReserva = -1; // Valor predeterminado si no se encuentra ningún resultado
+    /*
+    Se están seleccionando los FolioReserva de la tabla reservacion.
+    Se está haciendo un JOIN entre las tablas reservacion y mesa usando idMesa.
+    Se aplican múltiples condiciones utilizando el WHERE:
+    r.fecha = CURRENT_DATE(): Busca reservaciones que tengan la fecha actual.
+    TIMEDIFF(CURRENT_TIME(), r.hora) < '00:20:00': Verifica si la diferencia entre la hora actual y la hora de la reserva es menor a 20 minutos.
+    m.Estado = 2: Filtra las mesas que tienen un estado igual a 2.
+   m.idMesa = 1: Se limita la búsqueda a la mesa con idMesa que se haya seleccionado.
+    */
+    int folioReserva = -1; // Valor predeterminado si no se encuentra ningún resultado
 
-try (PreparedStatement pstmtFolio = conn.prepareStatement(queryObtenerFolio)) {
-    pstmtFolio.setInt(1, idMesa);
-    ResultSet rsFolio = pstmtFolio.executeQuery();
+try (PreparedStatement pstmtFolio = conn.prepareStatement(queryObtenerFolio)) { //Ejecutar consulta
+    pstmtFolio.setInt(1, idMesa); // Se agrega el id de la mesa que se use
+    ResultSet rsFolio = pstmtFolio.executeQuery(); // Agarra el resultado para usarlo
 
     if (rsFolio.next()) {
-        folioReserva = rsFolio.getInt("FolioReserva");
+        folioReserva = rsFolio.getInt("FolioReserva"); // Se asigna el resulta en folio de Reserva
     }
 } catch (SQLException ex) {
-    ex.printStackTrace();
+    ex.printStackTrace(); // En caso de que marque error
 }
 
+// Inserción en la tabla recibo
 String queryInsercion = "INSERT INTO recibo (idComanda, folioReserva, fecha, hora, totalSinIVA, totalConIVA) VALUES (?, ?, CURRENT_DATE, CURRENT_TIME, ?, ?)";
+/* 
+Se esta enviando un insert de la tabla recibo donde la variables seran el idComanda, el folio de reserva, la fecha , hora, totalsiniva, totalconiva
+LAs variables los sacamos de neatbeans, lo mas nuevo seria las funciones CURRENT_DATE, CURRENT_TIME, uno es para sacar la fecha de ese momento que se haga la consulta, lo mismo para la hora
+*/
 
-try (PreparedStatement pstmtInsercion = conn.prepareStatement(queryInsercion)) {
-    pstmtInsercion.setInt(1, idComanda);
-    pstmtInsercion.setInt(2, folioReserva);
-    pstmtInsercion.setDouble(3, total);
-    pstmtInsercion.setDouble(4, Final);
+try (PreparedStatement pstmtInsercion = conn.prepareStatement(queryInsercion)) { //Ejecutar consulta
+    pstmtInsercion.setInt(1, idComanda); // Se asigna un idcomanda
+    pstmtInsercion.setInt(2, folioReserva); // Se asigna el folio de reserva ya hecho anteriormente en la comanda
+    pstmtInsercion.setDouble(3, total); // se asigna el total almacenado en la comanda
+    pstmtInsercion.setDouble(4, Final); // se asigna doto junto con el iva 
     pstmtInsercion.executeUpdate();
 } catch (SQLException ex) {
     ex.printStackTrace();
 }      
     /////////////////////////////////////////////////////////////////
-        int dia = fechaHoraActual.getDayOfMonth();
+    // Se agarra la fecha que se uso en ese momento
+        int dia = fechaHoraActual.getDayOfMonth(); 
         int mes = fechaHoraActual.getMonthValue();
         int anio = fechaHoraActual.getYear();
-        
+        // Se asigna la hora completa
         int hora = fechaHoraActual.getHour();
         int minuto = fechaHoraActual.getMinute();
         int segundo = fechaHoraActual.getSecond();
-     String filename = "Recibo" + idMesa + ".pdf";
+     String filename = "Recibo" + idMesa + ".pdf"; // Documento para el pdf(Recibo)
         try (PDDocument document = new PDDocument()) {
             PDPage page = new PDPage();
             document.addPage(page);
-
+            
+            // Hacemos el formato del documento
             try (PDPageContentStream contentStream = new PDPageContentStream(document, page)) {
                 contentStream.beginText();
                 contentStream.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA), 14);
                 contentStream.setLeading(14.5f);
                 contentStream.newLineAtOffset(25, 700);
 
+                // Ponemos los detalles que se pondran en el recibo
                 contentStream.showText("Detalles del Recibo:" + idRecibo);
                 contentStream.newLine();
-                contentStream.showText("idComanda: " + idComanda); // Asumiendo que el ID del cliente es el folio
+                contentStream.showText("idComanda: " + idComanda); 
                 contentStream.newLine();
                 contentStream.showText("Folio de Reservacion:"+ folioReserva);
                 contentStream.newLine();
@@ -1097,27 +1231,36 @@ try (PreparedStatement pstmtInsercion = conn.prepareStatement(queryInsercion)) {
             JOptionPane.showMessageDialog(null, "Error al generar el archivo PDF.", "Error", JOptionPane.ERROR_MESSAGE);
             e.printStackTrace();
         }
-    
-               // La inserción se ha realizado con éxit             
-            
-    
+                      
          String quers = "INSERT INTO comanda (fecha, hora, FolioReserva) VALUES (CURRENT_DATE, CURRENT_TIME,"
                  + "(SELECT FolioReserva from reservacion r join mesa m on m.idMesa = r.idMesa WHERE r.fecha = current_date() and timediff(current_time, r.hora) < '00:20:00' and m.Estado = 2 and m.idMesa = ?))";
-          try (PreparedStatement pstmt = conn.prepareStatement(quers)) {
-              pstmt.setInt(1,idMesa);
-                pstmt.executeUpdate();
+         /*
+    Se están seleccionando los FolioReserva de la tabla reservacion.
+    Se está haciendo un JOIN entre las tablas reservacion y mesa usando idMesa.
+    Se aplican múltiples condiciones utilizando el WHERE:
+    r.fecha = CURRENT_DATE(): Busca reservaciones que tengan la fecha actual.
+    TIMEDIFF(CURRENT_TIME(), r.hora) < '00:20:00': Verifica si la diferencia entre la hora actual y la hora de la reserva es menor a 20 minutos.
+    m.Estado = 2: Filtra las mesas que tienen un estado igual a 2.
+   m.idMesa = 1: Se limita la búsqueda a la mesa con idMesa que se haya seleccionado.
+          */
+          try (PreparedStatement pstmt = conn.prepareStatement(quers)) { //Ejecutar consulta
+              pstmt.setInt(1,idMesa);  // Se agrega el id de la mesa que se use
+                pstmt.executeUpdate(); // Agarra el resultado para usarlo
             }
-     
-    System.out.println("leido Princi");
-       enviarComanda(juntarLista());
-       limpiarLista();
-       inicializarObjetos();
+       enviarComanda(juntarLista()); // Se enviara las comandas para saber cuantos platillos o bebidas seran, pero primero se enviara a otra funcion donde se contarar los elementos
+       limpiarLista(); // Limpia la lista 
+       inicializarObjetos(); 
 
     }
-    
+    /**
+     * Encontrar elementos duplicados y generar una lista con las cantidades de cada elemento.
+     * @return 
+     */
     public ArrayList<String[]> juntarLista() {
+        // Lista que contendrá los elementos únicos con sus cantidades
     ArrayList<String[]> lista = new ArrayList<>();
 
+    // Recorre el modeloLista para procesar los elementos
     for (int i = 0; i < modeloLista.getSize(); i++) {
         String orden = modeloLista.getElementAt(i);
         boolean encontrado = false;
@@ -1130,7 +1273,7 @@ try (PreparedStatement pstmtInsercion = conn.prepareStatement(queryInsercion)) {
             }
         }
 
-        // Si no está en la lista, agregarlo junto con su recuento
+        // Si no está en la lista, cuenta cuántas veces aparece y agrega el elemento con su recuento
         if (!encontrado) {
             int cuenta = 0;
             for (int j = 0; j < modeloLista.getSize(); j++) {
@@ -1142,14 +1285,21 @@ try (PreparedStatement pstmtInsercion = conn.prepareStatement(queryInsercion)) {
             lista.add(arreglo);
         }
     }
-
+    // Retorna la lista con los elementos encontrados
     return lista;
-}      
+}
+    /**
+     * Procesa la lista de elementos y los inserta en la base de datos según si son bebidas o platillos.
+     * @param lista para identificar el elemento de la lista a usar
+     * @throws SQLException 
+     */
     private static void enviarComanda(ArrayList<String[]> lista) throws SQLException {
+        // Obtener el ID de comanda general
     int idCma = idComanda;
+        // Variables para los ID de comanda específicos para platillos y bebidas
     int idCmaPlatillo = idCma;
     int idCmaBebida = idCma;
-
+    // Iterar sobre la lista de elementos
     for (int i = 0; i < lista.size(); i++) {
         try (Connection conn = getConnection()) {
             String nombre = lista.get(i)[0];
@@ -1157,18 +1307,27 @@ try (PreparedStatement pstmtInsercion = conn.prepareStatement(queryInsercion)) {
             
             String query;
             int idCmaActual;
-
+            // Si es una bebida, se usa el procedimiento almacenado para insertar en la tabla correspondiente
             if (esBebida(nombre)) {
                 System.out.println("Bebida" + nombre);
                 query = "call insertarbebidasporcomanda (?,(SELECT idBebida FROM bebida WHERE nombre = ?),?)";
+                /*
+                Se usa un stored procedure ya incluido en la base de datos, se usa para incluir el idComanda, el id bebida mediante el nombre sacado del Jlist, 
+                la cantidad que quiere, el precio unitario con solo saber el id se saca solo gracias al procedure
+                */
                 idCmaActual = idCmaBebida;
             } else {
+            // Si es un platillo, se usa el procedimiento almacenado para insertar en la tabla correspondiente
                 System.out.println("Platillo" + nombre);
                 query = "call insertarplatillosporcomanda (?,(SELECT idPlatillo FROM platillo WHERE nombre = ?),?)";
+                /*
+                Se usa un stored procedure ya incluido en la base de datos, se usa para incluir el idComanda, el id platillo mediante el nombre sacado del Jlist, 
+                la cantidad que quiere, el precio unitario con solo saber el id se saca solo gracias al procedure
+                */
                 idCmaActual = idCmaPlatillo;
                  }
-
-            PreparedStatement ps = conn.prepareStatement(query);
+// Preparar y ejecutar la consulta SQL
+            PreparedStatement ps = conn.prepareStatement(query); //Ejecutar consulta
             ps.setInt(1, idCmaActual);
             ps.setString(2, nombre);
             ps.setInt(3, cantidad);
@@ -1179,19 +1338,23 @@ try (PreparedStatement pstmtInsercion = conn.prepareStatement(queryInsercion)) {
         }
     }
 }
-    
+    /**
+     * Se usa para la comparativa para saber si son bebidas o no
+     * @param nombre para comparar el elemento si es bebida o no
+     * @return 
+     */
     private static boolean esBebida(String nombre) {
-    List<String> bebidas = Arrays.asList("Calpis", "Sake", "Te Verde", "Refresco");
+    List<String> bebidas = Arrays.asList("Calpis", "Sake", "Te Verde", "Refresco"); // Se utilizara para saber si son bebidas o no gracias a ellos
     System.out.println(nombre);
-    return bebidas.contains(nombre);
+    return bebidas.contains(nombre); // retorna una un true si coincide con los nombres , si no se envia un false
 }
    
-    //return bebidas.contains(nombre.toLowerCase());
-    
-    
+    /**
+     * Borra la lista y tambien los costos que llevan almacenados
+     */
     private void limpiarLista() {
-    modeloLista.removeAllElements();
-    total = 0;
+    modeloLista.removeAllElements(); // Remueve todo lo de la lista
+    total = 0; // Pone en 0 el total almacenado
     JlblTotal.setText("Total: $" + total);
 }
     /**
@@ -1224,7 +1387,7 @@ try (PreparedStatement pstmtInsercion = conn.prepareStatement(queryInsercion)) {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             @Override
-            public void run() {
+            public void run(){
                 
                 new Ventana(idSucursal, idMesa).setVisible(true);
                 
