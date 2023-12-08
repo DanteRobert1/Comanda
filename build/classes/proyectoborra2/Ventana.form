@@ -584,9 +584,6 @@
         </Component>
         <Component class="javax.swing.JButton" name="jbtnIngreRamen">
           <Properties>
-            <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-              <Color blue="ff" green="ff" red="ff" type="rgb"/>
-            </Property>
             <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
               <Image iconType="3" name="/ImagenesNew/Imagenes/Ingredientes.png"/>
             </Property>
@@ -598,9 +595,6 @@
         </Component>
         <Component class="javax.swing.JButton" name="jbtnIngreCurry">
           <Properties>
-            <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-              <Color blue="ff" green="ff" red="ff" type="rgb"/>
-            </Property>
             <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
               <Image iconType="3" name="/ImagenesNew/Imagenes/Ingredientes.png"/>
             </Property>
@@ -612,9 +606,6 @@
         </Component>
         <Component class="javax.swing.JButton" name="jbtnIngreSushi">
           <Properties>
-            <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-              <Color blue="ff" green="ff" red="ff" type="rgb"/>
-            </Property>
             <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
               <Image iconType="3" name="/ImagenesNew/Imagenes/Ingredientes.png"/>
             </Property>
@@ -626,9 +617,6 @@
         </Component>
         <Component class="javax.swing.JButton" name="jbtnIngreSalmon">
           <Properties>
-            <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-              <Color blue="ff" green="ff" red="ff" type="rgb"/>
-            </Property>
             <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
               <Image iconType="3" name="/ImagenesNew/Imagenes/Ingredientes.png"/>
             </Property>
@@ -640,9 +628,6 @@
         </Component>
         <Component class="javax.swing.JButton" name="jbtnIngreWaffle">
           <Properties>
-            <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-              <Color blue="ff" green="ff" red="ff" type="rgb"/>
-            </Property>
             <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
               <Image iconType="3" name="/ImagenesNew/Imagenes/Ingredientes.png"/>
             </Property>
@@ -654,9 +639,6 @@
         </Component>
         <Component class="javax.swing.JButton" name="jbtnIngreMochis">
           <Properties>
-            <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-              <Color blue="ff" green="ff" red="ff" type="rgb"/>
-            </Property>
             <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
               <Image iconType="3" name="/ImagenesNew/Imagenes/Ingredientes.png"/>
             </Property>

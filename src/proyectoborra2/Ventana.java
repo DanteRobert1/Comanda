@@ -19,6 +19,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.DefaultListModel;
@@ -1118,6 +1120,15 @@ public class Ventana extends javax.swing.JFrame {
         if (confirmacion == JOptionPane.YES_OPTION) {
             // El usuario ha hecho clic en "Sí", realiza la acción que deseas
             mostrarVentanaDeConfirmacion(Final);
+            try {
+                new Ventana321(idSucursal,idMesa).setVisible(true);
+                Ventana321.cambiarEstado();
+                
+                this.dispose();
+            } catch (InterruptedException ex) {
+                System.out.println(ex);
+            }
+            
         } else {
             // El usuario ha hecho clic en "No" o ha cerrado el diálogo
             // Puedes realizar alguna otra acción si lo deseas
@@ -1151,21 +1162,20 @@ public class Ventana extends javax.swing.JFrame {
 try (PreparedStatement pstmtFolio = conn.prepareStatement(queryObtenerFolio)) { //Ejecutar consulta
     pstmtFolio.setInt(1, idMesa); // Se agrega el id de la mesa que se use
     ResultSet rsFolio = pstmtFolio.executeQuery(); // Agarra el resultado para usarlo
-
     if (rsFolio.next()) {
         folioReserva = rsFolio.getInt("FolioReserva"); // Se asigna el resulta en folio de Reserva
     }
 } catch (SQLException ex) {
     ex.printStackTrace(); // En caso de que marque error
 }
-
+/*
 // Inserción en la tabla recibo
 String queryInsercion = "INSERT INTO recibo (idComanda, folioReserva, fecha, hora, totalSinIVA, totalConIVA) VALUES (?, ?, CURRENT_DATE, CURRENT_TIME, ?, ?)";
 /* 
 Se esta enviando un insert de la tabla recibo donde la variables seran el idComanda, el folio de reserva, la fecha , hora, totalsiniva, totalconiva
 LAs variables los sacamos de neatbeans, lo mas nuevo seria las funciones CURRENT_DATE, CURRENT_TIME, uno es para sacar la fecha de ese momento que se haga la consulta, lo mismo para la hora
 */
-
+/*
 try (PreparedStatement pstmtInsercion = conn.prepareStatement(queryInsercion)) { //Ejecutar consulta
     pstmtInsercion.setInt(1, idComanda); // Se asigna un idcomanda
     pstmtInsercion.setInt(2, folioReserva); // Se asigna el folio de reserva ya hecho anteriormente en la comanda
@@ -1175,6 +1185,7 @@ try (PreparedStatement pstmtInsercion = conn.prepareStatement(queryInsercion)) {
 } catch (SQLException ex) {
     ex.printStackTrace();
 }      
+
     /////////////////////////////////////////////////////////////////
     // Se agarra la fecha que se uso en ese momento
         int dia = fechaHoraActual.getDayOfMonth(); 
@@ -1231,7 +1242,7 @@ try (PreparedStatement pstmtInsercion = conn.prepareStatement(queryInsercion)) {
             JOptionPane.showMessageDialog(null, "Error al generar el archivo PDF.", "Error", JOptionPane.ERROR_MESSAGE);
             e.printStackTrace();
         }
-                      
+            */          
          String quers = "INSERT INTO comanda (fecha, hora, FolioReserva) VALUES (CURRENT_DATE, CURRENT_TIME,"
                  + "(SELECT FolioReserva from reservacion r join mesa m on m.idMesa = r.idMesa WHERE r.fecha = current_date() and timediff(current_time, r.hora) < '00:20:00' and m.Estado = 2 and m.idMesa = ?))";
          /*
@@ -1247,7 +1258,6 @@ try (PreparedStatement pstmtInsercion = conn.prepareStatement(queryInsercion)) {
               pstmt.setInt(1,idMesa);  // Se agrega el id de la mesa que se use
                 pstmt.executeUpdate(); // Agarra el resultado para usarlo
             }
-       enviarComanda(juntarLista()); // Se enviara las comandas para saber cuantos platillos o bebidas seran, pero primero se enviara a otra funcion donde se contarar los elementos
        limpiarLista(); // Limpia la lista 
        inicializarObjetos(); 
 
@@ -1338,6 +1348,7 @@ try (PreparedStatement pstmtInsercion = conn.prepareStatement(queryInsercion)) {
         }
     }
 }
+    
     /**
      * Se usa para la comparativa para saber si son bebidas o no
      * @param nombre para comparar el elemento si es bebida o no
