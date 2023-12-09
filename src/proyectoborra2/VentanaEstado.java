@@ -12,73 +12,82 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
 
 /**
  *
- * @author rodol
+ * @author Equipo4
  */
-public class Ventana321 extends javax.swing.JFrame {
-
+public class VentanaEstado extends javax.swing.JFrame {
     ConexionBD conexion;
     private static int idSucursal;
     private static int idMesa;
     private static int estado;
+    
     /**
      * Creates new form Ventana321
      */
-    public Ventana321(int idSucursal, int idMesa) throws SQLException, InterruptedException {
+    public VentanaEstado(int idSucursal, int idMesa) throws SQLException, InterruptedException {
         initComponents();
         conexion = new ConexionBD();
-        this.idSucursal = idSucursal;
-        this.idMesa = idMesa;
-        consultaEstado();
-        System.out.println(estado);
-        apariencia();
+        this.idSucursal = idSucursal;   //Se asigna la sucursal que recibio la ventana a la variable global de aqui
+        this.idMesa = idMesa;           //Se asigna el id de la mesa que recibio la ventana a la variable global de aqui
+        consultaEstado();               //Se consulta el estado de la mesa
+        apariencia();                   //Se manda a llamar apariencia para mostrar la pantalla que le corresponde al estado de la mesa
     }
-    
+       
+    /**
+     * Metodo para modificar la apariencia de la ventana dependiendo del estado de la mesa
+     * @throws InterruptedException 
+     */
     private void apariencia() throws InterruptedException{
         switch (estado) {
             case 1:
             case 2:
             case 3:
-                jLbl1.setText("Bienvenidos!");
-                jBtn1.setText("Pedir");
-                break;
+                jLblMensaje.setText("Bienvenidos!");
+                jBtnAccion.setText("Pedir");
+                break;  //En los casos 1,2,3 solo se muestra la pantalla de bienvenida
             case 4:
             case 5:
-                jLbl1.setText("Su comida se esta preparando");
-                jBtn1.setVisible(false);
+                jLblMensaje.setText("Su comida se esta preparando");
+                jBtnAccion.setVisible(false);
                 esperarComidaLista();
-                break;
+                break;  //En los estados 4 y 5 se muestra la pantalla de esperando comida
             case 6:
             case 7:
             case 8:
-                jLbl1.setText("Su comida ya esta lista");
-                jBtn1.setText("Pagar");
-                jBtn1.setVisible(true);
+                jLblMensaje.setText("Su comida ya esta lista");
+                jBtnAccion.setText("Pagar");
+                jBtnAccion.setVisible(true);
+                break;  //En los casos 6,7 y 8 se muestra la pantalla de comida lista y da el boton para "pagar"/reiniciar el proceso
             default:
                 break; 
         }
     }
 
+    /**
+     * Metodo para consultar el estado actual de la mesa en la tabla
+     * @throws SQLException 
+     */
     private void consultaEstado() throws SQLException{
         int vEstado = -1;
         try (Connection conn = getConnection()){
-            String query = "SELECT estado from mesa where idMesa = ?;";
+            String query = "SELECT estado from mesa where idMesa = ?;"; //Instruccion de SQL para ver el estado de la mesa actual
             PreparedStatement ps = conn.prepareStatement(query);
             ps.setInt(1,idMesa);
             ResultSet rs = ps.executeQuery();
             rs.next();
             vEstado = rs.getInt(1);
-            System.out.println("1" + vEstado);
         } catch (SQLException ex){
-            System.out.println("Error: " + ex);
+            System.out.println("Error: " + ex); //En caso de error se imprime el error
         }
-        this.estado =  vEstado;
+        this.estado =  vEstado; //El estado que tiene la mesa dentro de la base de datos se le asigna a la variable global de la ventana
     }
     
+    /**
+     * Metodo para cambiar el estado de la mesa al sisguiente paso
+     */
     public static void cambiarEstado(){
         String query = "";
         try (Connection conn = getConnection()){
@@ -87,15 +96,16 @@ public class Ventana321 extends javax.swing.JFrame {
                 case 2:
                 case 3:
                     query = "UPDATE mesa SET estado = 4 where idMesa = ?";
-                    break;
+                    break;  //En estados 1,2 o 3 se manda la mesa al estado 4, pidiendo (Ya que ahi significa que estan pidiendo)
                 case 4:
                     query = "UPDATE mesa SET estado = 5 where idMesa = ?";
-                    break;
+                    break;  //Cuando el estado sea 4, se cambia a 5 para mostrar que la mesa ya esta esperando su comida
                 case 5:
                 case 6:
                 case 7:
                 case 8:
                     query = "UPDATE mesa SET estado = 1 where idMesa = ?";
+                    break;  //En los casos 5,6,7 y 8 se brinca directamente al estado 1 ya que se "pago"
                 default:
                     break;
             }
@@ -103,10 +113,45 @@ public class Ventana321 extends javax.swing.JFrame {
             ps.setInt(1, idMesa);
             ps.executeUpdate();
         } catch (SQLException ex) {
-            System.out.println("Error en cambiarEstado: " + ex);
+            System.out.println("Error en cambiarEstado: " + ex); //En caso de error se imprime el error
         }
-        
     }
+    
+    /**
+     * Consulta el estado de la mesa cada 30 segundos para poder ver cuando este lista la comida
+     * @throws InterruptedException 
+     */
+    private void esperarComidaLista() throws InterruptedException{
+        //Crea el temporalizador para que se repita X instruccion (llamado tiempo)
+        Timer tiempo = new Timer("ConsultaEstado");
+        //Creacion del trabajo que se va a realizar repepitivamente (llamado validacion)
+        TimerTask consulta = new TimerTask() {
+            @Override
+            public void run() {
+                //Consulta el estado de la mesa
+                try (Connection conn = getConnection()){
+                    consultaEstado();
+                } catch (SQLException ex){
+                    System.out.println(ex); //En caso de error se imprime el error
+                }
+                //Si la mesa se encuentra en estado de comida lista
+                if (estado == 6){
+                    try {
+                        apariencia();
+                        //Se termina el temporalizador y continua el proceso del restaurante
+                        Thread.sleep(0);
+                        tiempo.cancel();
+                        
+                    } catch (InterruptedException ex) {
+                        System.out.println(ex); //En caso de error se imprime el error
+                    }
+                }
+            }
+        };
+        //Se inicia el temporalizador y cada 15 segundos se realiza el proceso de consulta
+        tiempo.scheduleAtFixedRate(consulta,0,15000L);
+    }
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -119,8 +164,8 @@ public class Ventana321 extends javax.swing.JFrame {
         jLabel3 = new javax.swing.JLabel();
         jLabel5 = new javax.swing.JLabel();
         jPanel1 = new javax.swing.JPanel();
-        jLbl1 = new javax.swing.JLabel();
-        jBtn1 = new javax.swing.JButton();
+        jLblMensaje = new javax.swing.JLabel();
+        jBtnAccion = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
@@ -140,17 +185,18 @@ public class Ventana321 extends javax.swing.JFrame {
 
         jPanel1.setBackground(new java.awt.Color(32, 17, 72));
 
-        jLbl1.setFont(new java.awt.Font("Barlow ExtraLight", 2, 36)); // NOI18N
-        jLbl1.setForeground(new java.awt.Color(85, 231, 255));
-        jLbl1.setText(":");
+        jLblMensaje.setFont(new java.awt.Font("Barlow ExtraLight", 2, 36)); // NOI18N
+        jLblMensaje.setForeground(new java.awt.Color(85, 231, 255));
+        jLblMensaje.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLblMensaje.setText("Mensaje");
 
-        jBtn1.setBackground(new java.awt.Color(153, 204, 255));
-        jBtn1.setFont(new java.awt.Font("Barlow Medium", 1, 18)); // NOI18N
-        jBtn1.setForeground(new java.awt.Color(102, 0, 102));
-        jBtn1.setText("Accion");
-        jBtn1.addActionListener(new java.awt.event.ActionListener() {
+        jBtnAccion.setBackground(new java.awt.Color(153, 204, 255));
+        jBtnAccion.setFont(new java.awt.Font("Barlow Medium", 1, 18)); // NOI18N
+        jBtnAccion.setForeground(new java.awt.Color(102, 0, 102));
+        jBtnAccion.setText("Accion");
+        jBtnAccion.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jBtn1ActionPerformed(evt);
+                jBtnAccionActionPerformed(evt);
             }
         });
 
@@ -180,17 +226,17 @@ public class Ventana321 extends javax.swing.JFrame {
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 155, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(31, 31, 31)
-                .addComponent(jLbl1, javax.swing.GroupLayout.PREFERRED_SIZE, 648, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 32, Short.MAX_VALUE)
+                .addGap(30, 30, 30)
+                .addComponent(jLblMensaje, javax.swing.GroupLayout.PREFERRED_SIZE, 648, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 31, Short.MAX_VALUE)
                 .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 155, javax.swing.GroupLayout.PREFERRED_SIZE))
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 155, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 709, Short.MAX_VALUE)
                 .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 155, javax.swing.GroupLayout.PREFERRED_SIZE))
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(382, 382, 382)
-                .addComponent(jBtn1, javax.swing.GroupLayout.PREFERRED_SIZE, 186, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(416, 416, 416)
+                .addComponent(jBtnAccion, javax.swing.GroupLayout.PREFERRED_SIZE, 186, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
@@ -203,10 +249,10 @@ public class Ventana321 extends javax.swing.JFrame {
                             .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(0, 0, Short.MAX_VALUE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                        .addContainerGap(119, Short.MAX_VALUE)
-                        .addComponent(jLbl1, javax.swing.GroupLayout.PREFERRED_SIZE, 131, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addContainerGap(121, Short.MAX_VALUE)
+                        .addComponent(jLblMensaje, javax.swing.GroupLayout.PREFERRED_SIZE, 131, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(69, 69, 69)
-                        .addComponent(jBtn1, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(jBtnAccion, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -226,17 +272,21 @@ public class Ventana321 extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-
-    private void jBtn1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jBtn1ActionPerformed
+    
+    /**
+     * Boton que realiza acciones dependiendo en que estado esta la mesa
+     * @param evt click en el boton
+     */
+    private void jBtnAccionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jBtnAccionActionPerformed
         try {
-            cambiarEstado();
+            cambiarEstado();    //Primero se actualiza el estado de la mesa en la base de datos al que le sigue, pero no el que esta aqui como variable global
             switch (estado) {
                 case 1:
                 case 2:
                 case 3:
-                    new Ventana(idSucursal,idMesa).setVisible(true);
+                    new VentanaMenu(idSucursal,idMesa).setVisible(true);
                     this.dispose();
-                    break;
+                    break;  //Para los estados 1,2 y 3 de la variable global se abre el menu para realizar un pedido y se cierra esta ventana
                 case 4:
                 case 5:
                 case 6:
@@ -245,17 +295,18 @@ public class Ventana321 extends javax.swing.JFrame {
                     try {
                         consultaEstado();
                     } catch (SQLException ex) {
-                        System.out.println(ex);
+                        System.out.println(ex); //En caso de error se imprime el error
                     }
                     apariencia();
+                    break;  //Para los estados 4-8, primero se consulta el estado actual de la mesa en la BD y luego se actualiza la apariencia de la ventana para el estado
                 default:
                     break;
             }
             // TODO add your handling code here:
         } catch (InterruptedException ex) {
-            System.out.println(ex);
+            System.out.println(ex); //En caso de error se imprime el error
         }
-    }//GEN-LAST:event_jBtn1ActionPerformed
+    }//GEN-LAST:event_jBtnAccionActionPerformed
 
     /**
      * @param args the command line arguments
@@ -274,80 +325,43 @@ public class Ventana321 extends javax.swing.JFrame {
                 }
             }
         } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(Ventana321.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(VentanaEstado.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(Ventana321.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(VentanaEstado.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(Ventana321.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(VentanaEstado.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(Ventana321.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(VentanaEstado.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
         //</editor-fold>
-
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
                 try {
-                    new Ventana321(idSucursal, idMesa).setVisible(true);
+                    new VentanaEstado(idSucursal, idMesa).setVisible(true);
                 } catch (SQLException ex) {
-                    System.out.println("Error: " + ex);
+                    System.out.println("Error: " + ex);//En caso de error se imprime el error
                 } catch (InterruptedException ex) {
-                    Logger.getLogger(Ventana321.class.getName()).log(Level.SEVERE, null, ex);
+                    System.out.println(ex);//En caso de error se imprime el error
                 }
             }
         });
     }
     
 
-    
-    /**
-     * Consulta el estado de la mesa cada 30 segundos para poder ver cuando este lista la comida
-     * @throws InterruptedException 
-     */
-    private void esperarComidaLista() throws InterruptedException{
-        //Crea el temporalizador para que se repita X instruccion (llamado tiempo)
-        Timer tiempo = new Timer("ConsultaEstado");
-        //Creacion del trabajo que se va a realizar repepitivamente (llamado validacion)
-        TimerTask consulta = new TimerTask() {
-            @Override
-            public void run() {
-                //Consulta el estado de la mesa
-                try (Connection conn = getConnection()){
-                    consultaEstado();
-                } catch (SQLException ex){
-                    System.out.println(ex);
-                }
-                //Si la mesa se encuentra en estado de comida lista
-                if (estado == 6){
-                    try {
-                        System.out.println("Ya esta");
-                        apariencia();
-                        //Se termina el temporalizador y continua el proceso del restaurante
-                        Thread.sleep(0);
-                        tiempo.cancel();
-                        
-                    } catch (InterruptedException ex) {
-                        System.out.println(ex);
-                    }
-                } else {
-                    System.out.println("No esta listo");
-                }
-            }
-        };
-        //Se inicia el temporalizador y cada 30 segundos se realiza el proceso de consulta
-        tiempo.scheduleAtFixedRate(consulta,0,30000L);
-    }
-    
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jBtn1;
+    private javax.swing.JButton jBtnAccion;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
-    private javax.swing.JLabel jLbl1;
+    private javax.swing.JLabel jLblMensaje;
     private javax.swing.JPanel jPanel1;
     // End of variables declaration//GEN-END:variables
 }
