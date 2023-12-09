@@ -1142,11 +1142,31 @@ public class Ventana extends javax.swing.JFrame {
      * @throws SQLException 
      */
     private void mostrarVentanaDeConfirmacion(double Final) throws SQLException {
-    idComanda++; // se va aumentando la comanda
-    idRecibo++; // Se va aumentando la comanda
+    //idComanda; // se va aumentando la comanda
+    //idRecibo; // Se va aumentando la comanda
      LocalDateTime fechaHoraActual = LocalDateTime.now(); // Poder saber la hora y la fecha actaul
     Connection conn = ConexionBD.getConnection(); // Conectar a la Base de datos
-    // Obtener el FolioReserva
+    String queru = "SELECT MAX(idComanda) + 1 as idComanda FROM comanda;";
+    try (PreparedStatement max = conn.prepareStatement(queru)) { //Ejecutar consulta
+        ResultSet maxVar = max.executeQuery();
+        if (maxVar.next()) {
+                idComanda = maxVar.getInt("idComanda");
+            }
+    }catch (SQLException e) {
+            // Manejo de errores (reemplaza con tu manejo específico de excepciones)
+            e.printStackTrace();
+        }
+    String quere = "SELECT MAX(idRecibo) + 1 as idRecibo FROM recibo";
+    try (PreparedStatement maxRecibo = conn.prepareStatement(quere)) { //Ejecutar consulta
+        ResultSet maxRe = maxRecibo.executeQuery();
+        if (maxRe.next()) {
+                idRecibo = maxRe.getInt("idRecibo");
+            }
+    }catch (SQLException e) {
+            // Manejo de errores (reemplaza con tu manejo específico de excepciones)
+            e.printStackTrace();
+        }
+     //Obtener el FolioReserva
     String queryObtenerFolio = "SELECT FolioReserva FROM reservacion r JOIN mesa m ON m.idMesa = r.idMesa WHERE r.fecha = CURRENT_DATE() AND TIMEDIFF(CURRENT_TIME(), r.hora) < '00:20:00' AND m.Estado = 2 AND m.idMesa = ?";
     /*
     Se están seleccionando los FolioReserva de la tabla reservacion.
@@ -1157,9 +1177,8 @@ public class Ventana extends javax.swing.JFrame {
     m.Estado = 2: Filtra las mesas que tienen un estado igual a 2.
    m.idMesa = 1: Se limita la búsqueda a la mesa con idMesa que se haya seleccionado.
     */
-    int folioReserva = -1; // Valor predeterminado si no se encuentra ningún resultado
-
-try (PreparedStatement pstmtFolio = conn.prepareStatement(queryObtenerFolio)) { //Ejecutar consulta
+    int folioReserva = 0; // Valor predeterminado si no se encuentra ningún resultado
+    try (PreparedStatement pstmtFolio = conn.prepareStatement(queryObtenerFolio)) { //Ejecutar consulta
     pstmtFolio.setInt(1, idMesa); // Se agrega el id de la mesa que se use
     ResultSet rsFolio = pstmtFolio.executeQuery(); // Agarra el resultado para usarlo
     if (rsFolio.next()) {
@@ -1168,19 +1187,55 @@ try (PreparedStatement pstmtFolio = conn.prepareStatement(queryObtenerFolio)) { 
 } catch (SQLException ex) {
     ex.printStackTrace(); // En caso de que marque error
 }
-/*
+if (folioReserva <= 0){
+        String queryObtenerFolioNO = "SELECT MAX(FolioReserva) + 1 as FolioReserva FROM reservacion";
+        try (PreparedStatement pstmtFolioExtra = conn.prepareStatement(queryObtenerFolioNO)) { //Ejecutar consulta
+    ResultSet rsFolioPorsi = pstmtFolioExtra.executeQuery(); // Agarra el resultado para usarlo
+    if (rsFolioPorsi.next()) {
+        folioReserva = rsFolioPorsi.getInt("FolioReserva"); // Se asigna el resulta en folio de Reserva
+    }
+} catch (SQLException ex) {
+    ex.printStackTrace(); // En caso de que marque error
+}
+        String queryNuevaReserv = "insert into reservacion values (?,NULL,CURRENT_DATE,CURRENT_TIME,?)";
+        try (PreparedStatement pstReserva = conn.prepareStatement(queryNuevaReserv)) { //Ejecutar consulta
+    pstReserva.setInt(1, folioReserva); // Se asigna el folio de reserva ya hecho anteriormente en la comanda
+    pstReserva.setDouble(2,idMesa);
+    System.out.println(pstReserva);
+    pstReserva.executeUpdate();
+} catch (SQLException ex) {
+    ex.printStackTrace();
+}      
+}
+
+String quers = "INSERT INTO comanda (fecha, hora, FolioReserva) VALUES (CURRENT_DATE, CURRENT_TIME,?)";
+         /*
+    Se están seleccionando los FolioReserva de la tabla reservacion.
+    Se está haciendo un JOIN entre las tablas reservacion y mesa usando idMesa.
+    Se aplican múltiples condiciones utilizando el WHERE:
+    r.fecha = CURRENT_DATE(): Busca reservaciones que tengan la fecha actual.
+    TIMEDIFF(CURRENT_TIME(), r.hora) < '00:20:00': Verifica si la diferencia entre la hora actual y la hora de la reserva es menor a 20 minutos.
+    m.Estado = 2: Filtra las mesas que tienen un estado igual a 2.
+   m.idMesa = 1: Se limita la búsqueda a la mesa con idMesa que se haya seleccionado.
+          */
+          try (PreparedStatement pstmt = conn.prepareStatement(quers)) { //Ejecutar consulta
+              System.out.println(pstmt);
+              pstmt.setInt(1,folioReserva);  // Se agrega el id de la mesa que se use
+                pstmt.executeUpdate(); // Agarra el resultado para usarlo
+            }
 // Inserción en la tabla recibo
 String queryInsercion = "INSERT INTO recibo (idComanda, folioReserva, fecha, hora, totalSinIVA, totalConIVA) VALUES (?, ?, CURRENT_DATE, CURRENT_TIME, ?, ?)";
 /* 
 Se esta enviando un insert de la tabla recibo donde la variables seran el idComanda, el folio de reserva, la fecha , hora, totalsiniva, totalconiva
 LAs variables los sacamos de neatbeans, lo mas nuevo seria las funciones CURRENT_DATE, CURRENT_TIME, uno es para sacar la fecha de ese momento que se haga la consulta, lo mismo para la hora
 */
-/*
+
 try (PreparedStatement pstmtInsercion = conn.prepareStatement(queryInsercion)) { //Ejecutar consulta
     pstmtInsercion.setInt(1, idComanda); // Se asigna un idcomanda
     pstmtInsercion.setInt(2, folioReserva); // Se asigna el folio de reserva ya hecho anteriormente en la comanda
     pstmtInsercion.setDouble(3, total); // se asigna el total almacenado en la comanda
     pstmtInsercion.setDouble(4, Final); // se asigna doto junto con el iva 
+    System.out.println(pstmtInsercion);
     pstmtInsercion.executeUpdate();
 } catch (SQLException ex) {
     ex.printStackTrace();
@@ -1224,7 +1279,6 @@ try (PreparedStatement pstmtInsercion = conn.prepareStatement(queryInsercion)) {
                 contentStream.newLine();
                 contentStream.endText();
             }
-
             document.save(filename);
 
             // Abrir el PDF generado
@@ -1241,26 +1295,10 @@ try (PreparedStatement pstmtInsercion = conn.prepareStatement(queryInsercion)) {
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, "Error al generar el archivo PDF.", "Error", JOptionPane.ERROR_MESSAGE);
             e.printStackTrace();
-        }
-            */          
-         String quers = "INSERT INTO comanda (fecha, hora, FolioReserva) VALUES (CURRENT_DATE, CURRENT_TIME,"
-                 + "(SELECT FolioReserva from reservacion r join mesa m on m.idMesa = r.idMesa WHERE r.fecha = current_date() and timediff(current_time, r.hora) < '00:20:00' and m.Estado = 2 and m.idMesa = ?))";
-         /*
-    Se están seleccionando los FolioReserva de la tabla reservacion.
-    Se está haciendo un JOIN entre las tablas reservacion y mesa usando idMesa.
-    Se aplican múltiples condiciones utilizando el WHERE:
-    r.fecha = CURRENT_DATE(): Busca reservaciones que tengan la fecha actual.
-    TIMEDIFF(CURRENT_TIME(), r.hora) < '00:20:00': Verifica si la diferencia entre la hora actual y la hora de la reserva es menor a 20 minutos.
-    m.Estado = 2: Filtra las mesas que tienen un estado igual a 2.
-   m.idMesa = 1: Se limita la búsqueda a la mesa con idMesa que se haya seleccionado.
-          */
-          try (PreparedStatement pstmt = conn.prepareStatement(quers)) { //Ejecutar consulta
-              pstmt.setInt(1,idMesa);  // Se agrega el id de la mesa que se use
-                pstmt.executeUpdate(); // Agarra el resultado para usarlo
-            }
+        }   
+       enviarComanda(juntarLista());
        limpiarLista(); // Limpia la lista 
        inicializarObjetos(); 
-
     }
     /**
      * Encontrar elementos duplicados y generar una lista con las cantidades de cada elemento.
